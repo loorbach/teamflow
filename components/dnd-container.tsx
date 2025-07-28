@@ -1,6 +1,6 @@
 "use client";
 
-import { Employee, Team } from "@/db/types";
+import { Employee, Team, TeamRoleTarget } from "@/db/types";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
 import TeamColumn from "./team-column";
@@ -8,9 +8,10 @@ import TeamColumn from "./team-column";
 type Props = {
   employees: Employee[];
   teams: Team[];
+  teamRoleTargets: TeamRoleTarget[];
 }
 
-function DnDContainer({ employees, teams }: Props) {
+function DnDContainer({ employees, teams, teamRoleTargets }: Props) {
   const [employeeList, setEmployeeList] = useState(employees);
 
   function handleDragEnd(event: DragEndEvent) {
@@ -37,12 +38,13 @@ function DnDContainer({ employees, teams }: Props) {
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 flex-wrap">
+      <div className="flex gap-4 flex-wrap px-4 py-2">
         {teams.map((team) => (
           <TeamColumn
             key={team.id}
             team={team}
             employees={employeeList.filter((e) => e.teamId === team.id)}
+            teamRoleTargets={teamRoleTargets}
           />
         ))}
       </div>

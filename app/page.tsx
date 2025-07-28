@@ -1,8 +1,9 @@
 import { auth } from "@/auth";
-import HomeClient from "@/components/home-client";
-import { SignOut } from "@/components/signout-button";
+import DnDContainer from "@/components/dnd-container";
+import Header from "@/components/header";
 import { db } from "@/db/client";
-import { employees, teams } from "@/db/schema";
+import { employees, roles, teamRoleTargets, teams } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 async function Home() {
@@ -12,15 +13,24 @@ async function Home() {
 
   const teamList = await db.select().from(teams);
   const employeesList = await db.select().from(employees);
+  const roleTargetList = await db
+  .select({
+    teamId: teamRoleTargets.teamId,
+    roleId: teamRoleTargets.roleId,
+    targetFte: teamRoleTargets.targetFte,
+    roleName: roles.name,
+  })
+  .from(teamRoleTargets)
+  .innerJoin(roles, eq(teamRoleTargets.roleId, roles.id));
+  // console.log(roleTargetList);
 
   return (
-    <main className="p-4 max-w-screen overflow-hidden">
-      <header className="flex justify-between">
-        <h1 className="text-2xl font-bold mb-4">TeamFlow</h1>
-        <SignOut />
-      </header>
-      <HomeClient teams={teamList} employees={employeesList} />
-    </main>
+    <>
+      <Header />
+      <main className="max-w-screen overflow-hidden">
+        <DnDContainer teams={teamList} employees={employeesList} teamRoleTargets={roleTargetList} />
+      </main>
+    </>
   );
 }
 

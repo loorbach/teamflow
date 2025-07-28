@@ -16,9 +16,6 @@ function EmployeeCard({ employee }: Props) {
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)`,
         transition: "transform 0.001s",
-        willChange: "transform",
-        zIndex: 50,
-        boxShadow: "0 6px 12px rgba(0, 0, 0, 0.15)",
       }
     : undefined;
 
@@ -32,9 +29,10 @@ function EmployeeCard({ employee }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1}}
       transition={{ duration: 0.2}}
-      className="p-2 border rounded bg-white shadow mb-2 cursor-grab active:cursor-grabbing select-none"
+      className="text-sm px-4 py-1 border rounded shadow mb-2 flex justify-between items-center cursor-grab active:cursor-grabbing select-none hover:border-blue-400 transition-colors duration-200"
     >
-      <div>{employee.firstName} {employee.lastName}</div>
+      <div>{employee.firstName.substring(0, 1)}. {employee.lastName}</div>
+      <div className="text-xs text-gray-500">{employee.roleId}</div>
       <div className="text-xs text-gray-500">{employee.fte} FTE</div>
     </motion.div>
   );
