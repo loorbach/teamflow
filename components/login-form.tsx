@@ -1,49 +1,34 @@
-import { signIn } from "@/auth"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { signIn } from '@/auth'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={async (formData) => {
-            "use server"
-            const formEntries = Object.fromEntries(formData.entries());
+          <form
+            action={async (formData) => {
+              'use server'
+              const formEntries = Object.fromEntries(formData.entries())
 
-            await signIn("credentials", {
-              ...formEntries,
-              redirectTo: "/"
-            })
-          }}>
+              await signIn('credentials', {
+                ...formEntries,
+                redirectTo: '/',
+              })
+            }}
+          >
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
+                <Input id="email" name="email" type="email" placeholder="m@example.com" required />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">

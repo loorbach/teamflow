@@ -1,4 +1,4 @@
-import type { AdapterAccountType } from "@auth/core/adapters"
+import type { AdapterAccountType } from '@auth/core/adapters'
 import {
   boolean,
   integer,
@@ -6,37 +6,37 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp
-} from "drizzle-orm/pg-core"
+  timestamp,
+} from 'drizzle-orm/pg-core'
 
-//auth 
-export const users = pgTable("user", {
-  id: text("id")
+//auth
+export const users = pgTable('user', {
+  id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: text("name"),
-  email: text("email").unique(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: text("image"),
-  passwordHash: text("passwordHash"),
+  name: text('name'),
+  email: text('email').unique(),
+  emailVerified: timestamp('emailVerified', { mode: 'date' }),
+  image: text('image'),
+  passwordHash: text('passwordHash'),
 })
- 
+
 export const accounts = pgTable(
-  "account",
+  'account',
   {
-    userId: text("userId")
+    userId: text('userId')
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").$type<AdapterAccountType>().notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccountType>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
   },
   (account) => [
     {
@@ -46,21 +46,21 @@ export const accounts = pgTable(
     },
   ]
 )
- 
-export const sessions = pgTable("session", {
-  sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
+
+export const sessions = pgTable('session', {
+  sessionToken: text('sessionToken').primaryKey(),
+  userId: text('userId')
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { mode: "date" }).notNull(),
+    .references(() => users.id, { onDelete: 'cascade' }),
+  expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
- 
+
 export const verificationTokens = pgTable(
-  "verificationToken",
+  'verificationToken',
   {
-    identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
   },
   (verificationToken) => [
     {
@@ -70,20 +70,20 @@ export const verificationTokens = pgTable(
     },
   ]
 )
- 
+
 export const authenticators = pgTable(
-  "authenticator",
+  'authenticator',
   {
-    credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
+    credentialID: text('credentialID').notNull().unique(),
+    userId: text('userId')
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    providerAccountId: text("providerAccountId").notNull(),
-    credentialPublicKey: text("credentialPublicKey").notNull(),
-    counter: integer("counter").notNull(),
-    credentialDeviceType: text("credentialDeviceType").notNull(),
-    credentialBackedUp: boolean("credentialBackedUp").notNull(),
-    transports: text("transports"),
+      .references(() => users.id, { onDelete: 'cascade' }),
+    providerAccountId: text('providerAccountId').notNull(),
+    credentialPublicKey: text('credentialPublicKey').notNull(),
+    counter: integer('counter').notNull(),
+    credentialDeviceType: text('credentialDeviceType').notNull(),
+    credentialBackedUp: boolean('credentialBackedUp').notNull(),
+    transports: text('transports'),
   },
   (authenticator) => [
     {
@@ -95,37 +95,59 @@ export const authenticators = pgTable(
 )
 
 //core functionality
-export const roles = pgTable("roles", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull().unique(),
+export const roles = pgTable('roles', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text('name').notNull().unique(),
 })
 
-export const teams = pgTable("teams", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
+export const teams = pgTable('teams', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text('name').notNull(),
 })
 
-export const employees = pgTable("employees", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  fte: numeric("fte").notNull(),
-  roleId: text("role_id").notNull().references(() => roles.id),
-  teamId: text("team_id").references(() => teams.id),
+export const employees = pgTable('employees', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  fte: numeric('fte').notNull(),
+  roleId: text('role_id')
+    .notNull()
+    .references(() => roles.id),
+  teamId: text('team_id').references(() => teams.id),
 })
 
-export const teamRoleTargets = pgTable("team_role_targets", {
-  teamId: text("team_id").notNull().references(() => teams.id),
-  roleId: text("role_id").notNull().references(() => roles.id),
-  targetFte: numeric("target_fte").notNull(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.teamId, table.roleId] }),
-}))
+export const teamRoleTargets = pgTable(
+  'team_role_targets',
+  {
+    teamId: text('team_id')
+      .notNull()
+      .references(() => teams.id),
+    roleId: text('role_id')
+      .notNull()
+      .references(() => roles.id),
+    targetFte: numeric('target_fte').notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.teamId, table.roleId] }),
+  })
+)
 
-export const employeeNotes = pgTable("employee_notes", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  employeeId: text("employee_id").notNull().references(() => employees.id),
-  userId: text("user_id").notNull().references(() => users.id),
-  note: text("note").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+export const employeeNotes = pgTable('employee_notes', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  employeeId: text('employee_id')
+    .notNull()
+    .references(() => employees.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
+  note: text('note').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })

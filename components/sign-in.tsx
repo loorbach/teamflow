@@ -1,18 +1,18 @@
-import { signIn } from "@/auth";
- 
+import { signIn } from '@/auth'
+
 export function SignIn() {
   return (
     <form
       action={async (formData) => {
-        "use server"
-        console.log("inside server form action");
-        const formEntries = Object.fromEntries(formData.entries());
-        console.log("form info", formData, formEntries, typeof formData, typeof formEntries);
-        
-        await signIn("credentials",  {
+        'use server'
+        console.log('inside server form action')
+        const formEntries = Object.fromEntries(formData.entries())
+        console.log('form info', formData, formEntries, typeof formData, typeof formEntries)
+
+        await signIn('credentials', {
           ...formEntries,
-          redirectTo: "/"
-        });
+          redirectTo: '/',
+        })
       }}
     >
       <label>

@@ -1,39 +1,39 @@
-"use client";
+'use client'
 
-import { Employee, Team, TeamRoleTarget } from "@/db/types";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { useState } from "react";
-import TeamColumn from "./team-column";
+import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { DndContext, DragEndEvent } from '@dnd-kit/core'
+import { useState } from 'react'
+import TeamColumn from './team-column'
 
 type Props = {
-  employees: Employee[];
-  teams: Team[];
-  teamRoleTargets: TeamRoleTarget[];
+  employees: Employee[]
+  teams: Team[]
+  teamRoleTargets: TeamRoleTarget[]
+  employeeNotes: EmployeeNote[]
 }
 
-function DnDContainer({ employees, teams, teamRoleTargets }: Props) {
-  const [employeeList, setEmployeeList] = useState(employees);
+function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes }: Props) {
+  const [employeeList, setEmployeeList] = useState(employees)
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over) return;
+    const { active, over } = event
+    console.log(event)
+    if (!over) return
 
-    const employeeId = active.id.toString();
-    const newTeamId = over.id.toString();
+    const employeeId = active.id.toString()
+    const newTeamId = over.id.toString()
 
-    console.log("post", employeeId, newTeamId)
-    
+    console.log('post', employeeId, newTeamId)
+
     setEmployeeList((prev) =>
-      prev.map((emp) =>
-        emp.id === employeeId ? { ...emp, teamId: newTeamId } : emp
-      )
-    );
+      prev.map((emp) => (emp.id === employeeId ? { ...emp, teamId: newTeamId } : emp))
+    )
 
-    fetch("/api/employees/move", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    fetch('/api/employees/move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ employeeId, teamId: newTeamId }),
-    });
+    })
   }
 
   return (
@@ -45,11 +45,12 @@ function DnDContainer({ employees, teams, teamRoleTargets }: Props) {
             team={team}
             employees={employeeList.filter((e) => e.teamId === team.id)}
             teamRoleTargets={teamRoleTargets}
+            employeeNotes={employeeNotes}
           />
         ))}
       </div>
     </DndContext>
-  );
+  )
 }
 
-export default DnDContainer;
+export default DnDContainer
