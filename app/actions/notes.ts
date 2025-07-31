@@ -40,9 +40,21 @@ export async function addNote(formData: FormData) {
   return newNote
 }
 
+const deleteSchema = z.object({
+  noteId: z.string().min(1),
+})
+
 export async function deleteNote(noteId: string) {
   const session = await auth()
   if (!session?.user) throw new Error('Not authenticated')
+
+  const parsed = deleteSchema.safeParse({
+    noteId,
+  })
+
+  if (!parsed.success) {
+    throw new Error('Invalid input')
+  }
 
   await db.delete(employeeNotes).where(eq(employeeNotes.id, noteId))
 }

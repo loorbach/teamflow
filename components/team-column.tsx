@@ -14,9 +14,17 @@ type Props = {
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
   onNoteAdded: (note: EmployeeNote) => void
+  onNoteDeleted: (noteId: string) => void
 }
 
-function TeamColumn({ team, employees, teamRoleTargets, employeeNotes, onNoteAdded }: Props) {
+function TeamColumn({
+  team,
+  employees,
+  teamRoleTargets,
+  employeeNotes,
+  onNoteAdded,
+  onNoteDeleted,
+}: Props) {
   const { setNodeRef } = useDroppable({ id: team.id })
   const [open, setOpen] = useState(false)
   const currentTotalFte = employees.reduce((acc, el) => acc + parseFloat(el.fte), 0)
@@ -77,6 +85,7 @@ function TeamColumn({ team, employees, teamRoleTargets, employeeNotes, onNoteAdd
             employee={emp}
             employeeNotes={employeeNotes}
             onNoteAdded={onNoteAdded}
+            onNoteDeleted={onNoteDeleted}
           />
         ))}
       </div>

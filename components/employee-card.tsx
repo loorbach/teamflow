@@ -1,11 +1,11 @@
 'use client'
 
-import { addNote } from '@/app/actions/notes'
+import { addNote, deleteNote } from '@/app/actions/notes'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Employee, EmployeeNote } from '@/db/types'
 import { useDraggable } from '@dnd-kit/core'
 import { motion } from 'framer-motion'
-import { CirclePlus, GripVertical } from 'lucide-react'
+import { CirclePlus, GripVertical, Trash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -15,9 +15,10 @@ type Props = {
   employee: Employee
   employeeNotes: EmployeeNote[]
   onNoteAdded: (note: EmployeeNote) => void
+  onNoteDeleted: (noteId: string) => void
 }
 
-function EmployeeCard({ employee, employeeNotes, onNoteAdded }: Props) {
+function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: Props) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: employee.id,
   })
@@ -75,15 +76,37 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded }: Props) {
       </div>
 
       {expanded && (
-        <div className="mt-2 text-xs text-gray-600 space-y-1 hover:cursor-default">
+        <div className="mt-2 text-xs text-gray-900 space-y-1 hover:cursor-default group">
           {notesForEmployee.length > 0 &&
             notesForEmployee.map((note) => (
-              <div key={note.id} className="overflow-hidden border-t pt-2">
-                <div className="line-clamp-4">{note.note}</div>
-                <div className="text-[11px] text-gray-900 mt-0.5">
-                  {note.createdAt
-                    ? new Date(note.createdAt).toLocaleDateString('nl-NL')
-                    : 'Unknown date'}
+              <div
+                key={note.id}
+                className="flex justify-between items-center overflow-hidden border-t pt-2"
+              >
+                <div className="">
+                  <div className="">{note.note}</div>
+                  <div className="text-[11px] text-gray-600 mt-0.5">
+                    {note.createdAt
+                      ? new Date(note.createdAt).toLocaleDateString('nl-NL')
+                      : 'Unknown date'}
+                  </div>
+                </div>
+                <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                  <input type="hidden" name="noteId" value={note.id} />
+                  <Button
+                    size="sm"
+                    type="submit"
+                    variant="ghost"
+                    className="hover:cursor-pointer"
+                    onClick={async () => {
+                      // const confirmed = confirm('Delete this note?')
+                      // if (!confirmed) return
+                      await deleteNote(note.id)
+                      onNoteDeleted(note.id)
+                    }}
+                  >
+                    <Trash />
+                  </Button>
                 </div>
               </div>
             ))}

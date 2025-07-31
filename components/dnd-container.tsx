@@ -18,13 +18,10 @@ function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initia
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
-    console.log(event)
     if (!over) return
 
     const employeeId = active.id.toString()
     const newTeamId = over.id.toString()
-
-    console.log('post', employeeId, newTeamId)
 
     setEmployeeList((prev) =>
       prev.map((emp) => (emp.id === employeeId ? { ...emp, teamId: newTeamId } : emp))
@@ -48,6 +45,9 @@ function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initia
             teamRoleTargets={teamRoleTargets}
             employeeNotes={employeeNotes}
             onNoteAdded={(note) => setEmployeeNotes((prev) => [...prev, note])}
+            onNoteDeleted={(noteId) =>
+              setEmployeeNotes((prev) => prev.filter((n) => n.id !== noteId))
+            }
           />
         ))}
       </div>

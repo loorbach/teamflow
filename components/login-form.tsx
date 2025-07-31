@@ -43,7 +43,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 <Input id="password" name="password" type="password" required />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full hover:cursor-pointer">
                   Login
                 </Button>
               </div>
