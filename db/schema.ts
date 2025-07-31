@@ -7,6 +7,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  varchar,
 } from 'drizzle-orm/pg-core'
 
 //auth
@@ -148,6 +149,6 @@ export const employeeNotes = pgTable('employee_notes', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id),
-  note: text('note').notNull(),
+  note: varchar('note', { length: 144 }).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })

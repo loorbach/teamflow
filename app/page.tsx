@@ -29,14 +29,12 @@ async function Home() {
   return (
     <>
       <Header />
-      <main className="max-w-screen overflow-hidden">
-        <DnDContainer
-          teams={teamList}
-          employees={employeesList}
-          teamRoleTargets={roleTargetList}
-          employeeNotes={employeeNoteList}
-        />
-      </main>
+      <DnDContainer
+        teams={teamList}
+        employees={employeesList}
+        teamRoleTargets={roleTargetList}
+        employeeNotes={employeeNoteList}
+      />
     </>
   )
 }

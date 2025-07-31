@@ -13,9 +13,10 @@ type Props = {
   employees: Employee[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
+  onNoteAdded: (note: EmployeeNote) => void
 }
 
-function TeamColumn({ team, employees, teamRoleTargets, employeeNotes }: Props) {
+function TeamColumn({ team, employees, teamRoleTargets, employeeNotes, onNoteAdded }: Props) {
   const { setNodeRef } = useDroppable({ id: team.id })
   const [open, setOpen] = useState(false)
   const currentTotalFte = employees.reduce((acc, el) => acc + parseFloat(el.fte), 0)
@@ -71,7 +72,12 @@ function TeamColumn({ team, employees, teamRoleTargets, employeeNotes }: Props) 
       )}
       <div className="flex flex-col space-y-1.5">
         {employees.map((emp) => (
-          <EmployeeCard key={emp.id} employee={emp} employeeNotes={employeeNotes} />
+          <EmployeeCard
+            key={emp.id}
+            employee={emp}
+            employeeNotes={employeeNotes}
+            onNoteAdded={onNoteAdded}
+          />
         ))}
       </div>
     </Card>

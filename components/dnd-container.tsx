@@ -12,8 +12,9 @@ type Props = {
   employeeNotes: EmployeeNote[]
 }
 
-function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes }: Props) {
+function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initialNotes }: Props) {
   const [employeeList, setEmployeeList] = useState(employees)
+  const [employeeNotes, setEmployeeNotes] = useState<EmployeeNote[]>(initialNotes)
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -46,6 +47,7 @@ function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes }: Prop
             employees={employeeList.filter((e) => e.teamId === team.id)}
             teamRoleTargets={teamRoleTargets}
             employeeNotes={employeeNotes}
+            onNoteAdded={(note) => setEmployeeNotes((prev) => [...prev, note])}
           />
         ))}
       </div>
