@@ -1,8 +1,6 @@
 'use client'
 import { Employee } from '@/db/types'
-import { FoldVertical } from 'lucide-react'
 import { AddEmployeeDialog } from './add-employee-dialog'
-import { Toggle } from './ui/toggle'
 
 type Props = {
   onEmployeeAdded: (employee: Employee) => void
@@ -11,9 +9,9 @@ type Props = {
 function HeaderControls({ onEmployeeAdded }: Props) {
   return (
     <div className="flex items-center gap-2">
-      <Toggle variant="outline" className="hover:cursor-pointer" aria-label="Fold cards">
+      {/* <Toggle variant="outline" className="hover:cursor-pointer" aria-label="Fold cards">
         <FoldVertical className="h-4 w-4" />
-      </Toggle>
+      </Toggle> */}
       <AddEmployeeDialog onEmployeeAdded={onEmployeeAdded} />
     </div>
   )

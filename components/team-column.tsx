@@ -3,10 +3,12 @@
 import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
 import { ChevronsUpDown } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import EmployeeCard from './employee-card'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
+
+const EmployeeCard = dynamic(() => import('./employee-card'), { ssr: false })
 
 type Props = {
   team: Team

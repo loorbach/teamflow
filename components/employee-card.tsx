@@ -37,12 +37,10 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
 
   return (
     <motion.div
-      layout
+      layout="position"
       ref={setNodeRef}
       style={style}
       role="button"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
       className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border rounded shadow bg-white hover:border-blue-400 transition-colors duration-200 outline-none"
     >
@@ -86,9 +84,7 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
                 <div className="">
                   <div className="">{note.note}</div>
                   <div className="text-[11px] text-gray-600 mt-0.5">
-                    {note.createdAt
-                      ? new Date(note.createdAt).toLocaleDateString('nl-NL')
-                      : 'Unknown date'}
+                    {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
                   </div>
                 </div>
                 <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
