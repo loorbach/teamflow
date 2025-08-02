@@ -5,6 +5,7 @@ import {
   numeric,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
   varchar,
@@ -116,7 +117,7 @@ export const employees = pgTable('employees', {
     .$defaultFn(() => crypto.randomUUID()),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
-  fte: numeric('fte').notNull(),
+  fte: real('fte').notNull(),
   roleId: text('role_id')
     .notNull()
     .references(() => roles.id),

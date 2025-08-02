@@ -6,9 +6,3 @@ export type Team = InferSelectModel<typeof teams>
 export type Role = InferSelectModel<typeof roles>
 export type TeamRoleTarget = InferSelectModel<typeof teamRoleTargets>
 export type EmployeeNote = InferSelectModel<typeof employeeNotes>
-
-export type OptimisticEmployeeNote = Omit<EmployeeNote, 'id' | 'userId' | 'createdAt'> & {
-  id: string
-  createdAt: string
-  isPending?: boolean
-}

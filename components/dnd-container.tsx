@@ -7,13 +7,19 @@ import TeamColumn from './team-column'
 
 type Props = {
   employees: Employee[]
+  setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
 }
 
-function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initialNotes }: Props) {
-  const [employeeList, setEmployeeList] = useState(employees)
+function DnDContainer({
+  employees,
+  setEmployees,
+  teams,
+  teamRoleTargets,
+  employeeNotes: initialNotes,
+}: Props) {
   const [employeeNotes, setEmployeeNotes] = useState<EmployeeNote[]>(initialNotes)
 
   function handleDragEnd(event: DragEndEvent) {
@@ -23,7 +29,7 @@ function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initia
     const employeeId = active.id.toString()
     const newTeamId = over.id.toString()
 
-    setEmployeeList((prev) =>
+    setEmployees((prev) =>
       prev.map((emp) => (emp.id === employeeId ? { ...emp, teamId: newTeamId } : emp))
     )
 
@@ -41,7 +47,7 @@ function DnDContainer({ employees, teams, teamRoleTargets, employeeNotes: initia
           <TeamColumn
             key={team.id}
             team={team}
-            employees={employeeList.filter((e) => e.teamId === team.id)}
+            employees={employees.filter((e) => e.teamId === team.id)}
             teamRoleTargets={teamRoleTargets}
             employeeNotes={employeeNotes}
             onNoteAdded={(note) => setEmployeeNotes((prev) => [...prev, note])}

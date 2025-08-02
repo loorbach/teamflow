@@ -97,7 +97,6 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
                     size="sm"
                     type="submit"
                     variant="ghost"
-                    className="hover:cursor-pointer"
                     onClick={async () => {
                       // const confirmed = confirm('Delete this note?')
                       // if (!confirmed) return
@@ -113,7 +112,7 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
           <div className="border-t mt-2">
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button size="sm" variant="outline" className="my-1 hover:cursor-pointer">
+                <Button size="sm" variant="outline" className="my-1">
                   <CirclePlus />
                 </Button>
               </PopoverTrigger>
@@ -146,7 +145,13 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
                       }
                     }}
                   />
-                  <Button type="submit" size="sm" disabled={noteText.trim().length === 0}>
+                  <Button
+                    variant="outline"
+                    type="submit"
+                    size="sm"
+                    className="hover: cursor-pointer"
+                    disabled={noteText.trim().length === 0}
+                  >
                     Save
                   </Button>
                 </form>

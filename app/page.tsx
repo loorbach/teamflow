@@ -1,6 +1,5 @@
 import { auth } from '@/auth'
-import DnDContainer from '@/components/dnd-container'
-import Header from '@/components/header'
+import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
 import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
 import { eq } from 'drizzle-orm'
@@ -22,20 +21,17 @@ async function Home() {
     })
     .from(teamRoleTargets)
     .innerJoin(roles, eq(teamRoleTargets.roleId, roles.id))
-  // console.log(roleTargetList);
-
   const employeeNoteList = await db.select().from(employeeNotes)
 
+  // TODO: Add home wrapper, lift state employeeList from dnd to home wrapper, this is now client. call home wrapper here so this stays server. handle onEmployeeAdded state by setting employeeList with new employee in it.
+
   return (
-    <>
-      <Header />
-      <DnDContainer
-        teams={teamList}
-        employees={employeesList}
-        teamRoleTargets={roleTargetList}
-        employeeNotes={employeeNoteList}
-      />
-    </>
+    <HomeWrapper
+      teams={teamList}
+      initialEmployees={employeesList}
+      teamRoleTargets={roleTargetList}
+      employeeNotes={employeeNoteList}
+    />
   )
 }
 

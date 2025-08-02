@@ -27,7 +27,7 @@ function TeamColumn({
 }: Props) {
   const { setNodeRef } = useDroppable({ id: team.id })
   const [open, setOpen] = useState(false)
-  const currentTotalFte = employees.reduce((acc, el) => acc + parseFloat(el.fte), 0)
+  const currentTotalFte = employees.reduce((acc, el) => acc + el.fte, 0)
   const teamTotalFte = teamRoleTargets
     .filter((obj) => obj.teamId === team.id)
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
@@ -39,12 +39,7 @@ function TeamColumn({
         <span className="font-mono tracking-tighter">
           {currentTotalFte.toFixed(1)}/{teamTotalFte.toFixed(1)}
         </span>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="size-6 hover:cursor-pointer"
-          onClick={() => setOpen(!open)}
-        >
+        <Button variant="secondary" size="icon" className="size-6" onClick={() => setOpen(!open)}>
           <ChevronsUpDown />
         </Button>
       </div>
@@ -54,7 +49,7 @@ function TeamColumn({
             .filter((target) => target.teamId === team.id)
             .map((target) => {
               const employeesInRole = employees.filter((e) => e.roleId === target.roleId)
-              const currentFte = employeesInRole.reduce((sum, e) => sum + parseFloat(e.fte), 0)
+              const currentFte = employeesInRole.reduce((sum, e) => sum + e.fte, 0)
               const delta = Math.abs(currentFte - parseFloat(target.targetFte))
 
               let color = 'text-red-500'

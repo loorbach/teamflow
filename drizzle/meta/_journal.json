@@ -15,6 +15,20 @@
       "when": 1753870584622,
       "tag": "0001_good_mercury",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754145067761,
+      "tag": "0002_lowly_goblin_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754145123431,
+      "tag": "0003_purple_molly_hayes",
+      "breakpoints": true
     }
   ]
 }
