@@ -4,7 +4,6 @@ import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
 import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 
@@ -17,6 +16,8 @@ type Props = {
   employeeNotes: EmployeeNote[]
   onNoteAdded: (note: EmployeeNote) => void
   onNoteDeleted: (noteId: string) => void
+  onToggle: () => void
+  open: boolean
 }
 
 function TeamColumn({
@@ -26,9 +27,10 @@ function TeamColumn({
   employeeNotes,
   onNoteAdded,
   onNoteDeleted,
+  onToggle,
+  open,
 }: Props) {
   const { setNodeRef } = useDroppable({ id: team.id })
-  const [open, setOpen] = useState(false)
   const currentTotalFte = employees.reduce((acc, el) => acc + el.fte, 0)
   const teamTotalFte = teamRoleTargets
     .filter((obj) => obj.teamId === team.id)
@@ -44,7 +46,7 @@ function TeamColumn({
             <TriangleAlert className="ml-2 size-4 text-[var(--destructive)]" strokeWidth={2} />
           )}
         </span>
-        <Button variant="secondary" size="icon" className="size-6" onClick={() => setOpen(!open)}>
+        <Button variant="secondary" size="icon" className="size-6" onClick={onToggle}>
           <ChevronsUpDown />
         </Button>
       </div>

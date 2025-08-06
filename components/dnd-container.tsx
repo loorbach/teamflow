@@ -14,6 +14,8 @@ type Props = {
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
+  toggleOneTeam: (teamId: string) => void
+  openTeamMap: Record<string, boolean>
 }
 
 function DnDContainer({
@@ -22,6 +24,8 @@ function DnDContainer({
   teams,
   teamRoleTargets,
   employeeNotes: initialNotes,
+  toggleOneTeam,
+  openTeamMap,
 }: Props) {
   const [employeeNotes, setEmployeeNotes] = useState<EmployeeNote[]>(initialNotes)
   const [dragging, setDragging] = useState(false)
@@ -68,6 +72,8 @@ function DnDContainer({
             onNoteDeleted={(noteId) =>
               setEmployeeNotes((prev) => prev.filter((n) => n.id !== noteId))
             }
+            onToggle={() => toggleOneTeam(team.id)}
+            open={!!openTeamMap[team.id]}
           />
         ))}
       </div>
