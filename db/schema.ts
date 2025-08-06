@@ -146,7 +146,9 @@ export const employeeNotes = pgTable('employee_notes', {
     .$defaultFn(() => crypto.randomUUID()),
   employeeId: text('employee_id')
     .notNull()
-    .references(() => employees.id),
+    .references(() => employees.id, {
+      onDelete: 'cascade',
+    }),
   userId: text('user_id')
     .notNull()
     .references(() => users.id),

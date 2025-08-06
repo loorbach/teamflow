@@ -24,7 +24,7 @@ export function AddEmployeeDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="ghost" size="sm">
           <UserPlus />
         </Button>
       </DialogTrigger>

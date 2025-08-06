@@ -74,6 +74,7 @@ function AddEmployeeForm({
         <Label htmlFor="lastName">Last name</Label>
         <Input id="lastName" type="text" required name="lastName" />
       </div>
+      <Label htmlFor="fte">FTE</Label>
       <div className="flex justify-between gap-6 items-center">
         <Slider defaultValue={[fte]} max={1} step={0.1} onValueChange={(val) => setFte(val[0])} />
         <span className="text-sm text-muted-foreground">{fte.toFixed(1)}</span>
@@ -117,7 +118,7 @@ function AddEmployeeForm({
         <input type="hidden" name="teamId" value={teamId ?? ''} />
       </div>
 
-      <DialogFooter>
+      <DialogFooter className="mt-2">
         <DialogClose asChild>
           <Button variant="outline">Cancel</Button>
         </DialogClose>

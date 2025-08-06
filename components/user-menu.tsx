@@ -1,3 +1,4 @@
+import { CircleUser } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +12,9 @@ import { SignOut } from './signout-button'
 function UserMenu() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+      <DropdownMenuTrigger>
+        <CircleUser className="hover:cursor-pointer" />
+      </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />

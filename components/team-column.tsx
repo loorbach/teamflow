@@ -2,7 +2,7 @@
 
 import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
-import { ChevronsUpDown } from 'lucide-react'
+import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { Button } from './ui/button'
@@ -37,16 +37,19 @@ function TeamColumn({
   return (
     <Card ref={setNodeRef} className="border rounded p-4 min-w-64 gap-0.75">
       <div className="flex justify-between items-center px-1 text-sm mb-2">
-        <h2 className="tracking-tight">{team.name}</h2>
-        <span className="font-mono tracking-tighter">
+        <h2 className="tracking-tight text-foreground">{team.name}</h2>
+        <span className="inline-flex items-center font-mono tracking-tighter text-card-foreground">
           {currentTotalFte.toFixed(1)}/{teamTotalFte.toFixed(1)}
+          {Math.abs(currentTotalFte - teamTotalFte) > 1 && (
+            <TriangleAlert className="ml-2 size-4 text-[var(--destructive)]" strokeWidth={2} />
+          )}
         </span>
         <Button variant="secondary" size="icon" className="size-6" onClick={() => setOpen(!open)}>
           <ChevronsUpDown />
         </Button>
       </div>
       {open && (
-        <ul className="mb-2 px-1 space-y-0.5 text-xs text-gray-700 font-mono">
+        <ul className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono">
           {teamRoleTargets
             .filter((target) => target.teamId === team.id)
             .map((target) => {
@@ -54,11 +57,11 @@ function TeamColumn({
               const currentFte = employeesInRole.reduce((sum, e) => sum + e.fte, 0)
               const delta = Math.abs(currentFte - parseFloat(target.targetFte))
 
-              let color = 'text-red-500'
+              let color = 'text-destructive'
               if (delta <= 0.1) {
-                color = 'text-green-600'
+                color = 'text-[var(--success)]'
               } else if (delta <= 0.5) {
-                color = 'text-yellow-600'
+                color = 'text-[var(--warning)]'
               }
 
               return (

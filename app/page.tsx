@@ -23,8 +23,6 @@ async function Home() {
     .innerJoin(roles, eq(teamRoleTargets.roleId, roles.id))
   const employeeNoteList = await db.select().from(employeeNotes)
 
-  // TODO: Add home wrapper, lift state employeeList from dnd to home wrapper, this is now client. call home wrapper here so this stays server. handle onEmployeeAdded state by setting employeeList with new employee in it.
-
   return (
     <HomeWrapper
       teams={teamList}

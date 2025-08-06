@@ -42,7 +42,7 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
       style={style}
       role="button"
       transition={{ duration: 0.2 }}
-      className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border rounded shadow bg-white hover:border-blue-400 transition-colors duration-200 outline-none"
+      className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground"
     >
       <div
         className="flex justify-between items-center text-sm gap-2"
@@ -57,24 +57,23 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
             {noteCount > 0 && (
               <Badge
                 variant="secondary"
-                className="h-5 min-w-5 px-1 font-mono tabular-nums bg-blue-400 text-white"
+                className="h-5 min-w-5 px-1 font-mono tabular-nums dark:bg-[var(--brand)] bg-blue-500"
               >
                 {noteCount}
               </Badge>
             )}
           </div>
-          <div className="text-xs text-gray-500">{employee.roleId}</div>
+          <div className="text-xs text-muted-foreground">{employee.roleId}</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-xs font-mono text-right">{employee.fte}</div>
           <div {...listeners} {...attributes} data-drag-handle>
-            <GripVertical className="w-6 h-6 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500" />
+            <GripVertical className="w-6 h-6 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-blue-600 transition-colors duration-200" />
           </div>
         </div>
       </div>
-
       {expanded && (
-        <div className="mt-2 text-xs text-gray-900 space-y-1 hover:cursor-default group">
+        <div className="mt-2 text-xs text-secondary-foreground space-y-1 hover:cursor-default group">
           {notesForEmployee.length > 0 &&
             notesForEmployee.map((note) => (
               <div
@@ -83,7 +82,7 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
               >
                 <div className="">
                   <div className="">{note.note}</div>
-                  <div className="text-[11px] text-gray-600 mt-0.5">
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
                     {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
                   </div>
                 </div>
