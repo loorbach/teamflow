@@ -155,3 +155,27 @@ export const employeeNotes = pgTable('employee_notes', {
   note: varchar('note', { length: 144 }).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
 })
+
+export const tags = pgTable('tags', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  key: varchar('key', { length: 25 }).notNull().unique(),
+  label: varchar('label', { length: 50 }).notNull(),
+})
+
+export const employeeTags = pgTable(
+  'employee_tags',
+  {
+    employeeId: text('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.employeeId, table.tagId] }),
+  })
+)

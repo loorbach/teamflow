@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { Employee, EmployeeNote, EmployeeTag, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
 import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -14,6 +14,7 @@ type Props = {
   employees: Employee[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
+  employeeTags: EmployeeTag[]
   onNoteAdded: (note: EmployeeNote) => void
   onNoteDeleted: (noteId: string) => void
   onToggle: () => void
@@ -25,6 +26,7 @@ function TeamColumn({
   employees,
   teamRoleTargets,
   employeeNotes,
+  employeeTags,
   onNoteAdded,
   onNoteDeleted,
   onToggle,
@@ -88,6 +90,7 @@ function TeamColumn({
             employeeNotes={employeeNotes}
             onNoteAdded={onNoteAdded}
             onNoteDeleted={onNoteDeleted}
+            employeeTags={employeeTags}
           />
         ))}
       </div>

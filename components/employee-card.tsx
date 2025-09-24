@@ -2,7 +2,7 @@
 
 import { addNote, deleteNote } from '@/app/actions/notes'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Employee, EmployeeNote } from '@/db/types'
+import { Employee, EmployeeNote, EmployeeTag } from '@/db/types'
 import { useDraggable } from '@dnd-kit/core'
 import { motion } from 'framer-motion'
 import { CirclePlus, GripVertical, Trash } from 'lucide-react'
@@ -14,11 +14,18 @@ import { Textarea } from './ui/textarea'
 type Props = {
   employee: Employee
   employeeNotes: EmployeeNote[]
+  employeeTags: EmployeeTag[]
   onNoteAdded: (note: EmployeeNote) => void
   onNoteDeleted: (noteId: string) => void
 }
 
-function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: Props) {
+function EmployeeCard({
+  employee,
+  employeeNotes,
+  onNoteAdded,
+  onNoteDeleted,
+  employeeTags,
+}: Props) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: employee.id,
   })
@@ -30,6 +37,8 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
     [employeeNotes, employee.id]
   )
   const noteCount = notesForEmployee.length
+
+  const tagsForEmployee = employeeTags.filter((tag) => tag.employeeId === employee.id)
 
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)`, transition: 'transform 0.001s' }
@@ -62,6 +71,14 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
                 {noteCount}
               </Badge>
             )}
+            {tagsForEmployee &&
+              tagsForEmployee.map((tag) => (
+                <Badge
+                  key={tag.tagId}
+                  className="h-5 min-w-5 px-1 bg-green-500 dark:bg-green-600"
+                  variant="secondary"
+                ></Badge>
+              ))}
           </div>
           <div className="text-xs text-muted-foreground">{employee.roleId}</div>
         </div>

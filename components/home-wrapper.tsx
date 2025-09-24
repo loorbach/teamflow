@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { Employee, EmployeeNote, EmployeeTag, Team, TeamRoleTarget } from '@/db/types'
 import { useState } from 'react'
 import DnDContainer from './dnd-container'
 
@@ -11,9 +11,16 @@ type Props = {
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
+  employeeTags: EmployeeTag[]
 }
 
-function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }: Props) {
+function HomeWrapper({
+  initialEmployees,
+  teams,
+  teamRoleTargets,
+  employeeNotes,
+  employeeTags,
+}: Props) {
   const [employeeList, setEmployeeList] = useState<Employee[]>(initialEmployees)
   const [openTeamMap, setOpenTeamMap] = useState<Record<string, boolean>>({})
 
@@ -47,6 +54,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
         setEmployees={setEmployeeList}
         teamRoleTargets={teamRoleTargets}
         employeeNotes={employeeNotes}
+        employeeTags={employeeTags}
         toggleOneTeam={toggleOneTeam}
         openTeamMap={openTeamMap}
       />

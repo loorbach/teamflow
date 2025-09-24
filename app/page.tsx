@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
-import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
+import { employeeNotes, employees, employeeTags, roles, teamRoleTargets, teams } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 
@@ -22,6 +22,7 @@ async function Home() {
     .from(teamRoleTargets)
     .innerJoin(roles, eq(teamRoleTargets.roleId, roles.id))
   const employeeNoteList = await db.select().from(employeeNotes)
+  const employeeTagList = await db.select().from(employeeTags)
 
   return (
     <HomeWrapper
@@ -29,6 +30,7 @@ async function Home() {
       initialEmployees={employeesList}
       teamRoleTargets={roleTargetList}
       employeeNotes={employeeNoteList}
+      employeeTags={employeeTagList}
     />
   )
 }

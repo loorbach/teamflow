@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { Employee, EmployeeNote, EmployeeTag, Team, TeamRoleTarget } from '@/db/types'
 import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -14,6 +14,7 @@ type Props = {
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
+  employeeTags: EmployeeTag[]
   toggleOneTeam: (teamId: string) => void
   openTeamMap: Record<string, boolean>
 }
@@ -26,6 +27,7 @@ function DnDContainer({
   employeeNotes: initialNotes,
   toggleOneTeam,
   openTeamMap,
+  employeeTags,
 }: Props) {
   const [employeeNotes, setEmployeeNotes] = useState<EmployeeNote[]>(initialNotes)
   const [dragging, setDragging] = useState(false)
@@ -74,6 +76,7 @@ function DnDContainer({
             }
             onToggle={() => toggleOneTeam(team.id)}
             open={!!openTeamMap[team.id]}
+            employeeTags={employeeTags}
           />
         ))}
       </div>
