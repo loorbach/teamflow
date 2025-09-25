@@ -72,6 +72,14 @@ function DnDContainer({
     return emp?.teamId ?? undefined
   }
 
+  function moveEmployee(employeeId: UniqueIdentifier, teamId: UniqueIdentifier) {
+    fetch('/api/employees/move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeId: employeeId, teamId: teamId }),
+    })
+  }
+
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id)
     setDragging(true)
@@ -126,6 +134,8 @@ function DnDContainer({
       return
     }
 
+    console.log(active.id === over.id)
+
     if (activeContainerId === overContainerId && active.id !== over.id) {
       console.log('attempting to sort inside of same team, using:', active.id, over.id)
       const oldIndex = employees.findIndex((e) => e.id === active.id)
@@ -133,7 +143,8 @@ function DnDContainer({
       if (oldIndex !== -1 && newIndex !== -1) {
         setEmployees((prev) => arrayMove(prev, oldIndex, newIndex))
       }
-    } else {
+      moveEmployee(active.id, overContainerId)
+    } else if (activeContainerId !== overContainerId && active.id !== over.id) {
       //cross team move
       console.log('attempting cross team move, trying to replace teamId of ? to', overContainerId)
       setEmployees((prev) =>
@@ -141,14 +152,8 @@ function DnDContainer({
           emp.id === active.id ? { ...emp, teamId: overContainerId.toString() } : emp
         )
       )
+      moveEmployee(active.id, overContainerId)
     }
-
-    fetch('/api/employees/move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ employeeId: active.id, teamId: overContainerId }),
-    })
-
     console.log('drag ended', event)
   }
 

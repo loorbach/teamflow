@@ -3,6 +3,7 @@
 import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { motion } from 'framer-motion'
 import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Button } from './ui/button'
@@ -52,7 +53,12 @@ function TeamColumn({
         </Button>
       </div>
       {open && (
-        <ul className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono">
+        <motion.ul
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono"
+        >
           {teamRoleTargets
             .filter((target) => target.teamId === team.id)
             .map((target) => {
@@ -79,7 +85,7 @@ function TeamColumn({
                 </li>
               )
             })}
-        </ul>
+        </motion.ul>
       )}
       <SortableContext
         key={team.id}
