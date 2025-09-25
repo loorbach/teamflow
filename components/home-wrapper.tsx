@@ -7,7 +7,7 @@ import DnDContainer from './dnd-container'
 import Header from './header'
 
 type Props = {
-  initialEmployees: Employee[]
+  initialEmployees: Employee[] //SELECT * FROM employees
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]

@@ -2,6 +2,7 @@
 
 import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
 import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Button } from './ui/button'
@@ -37,7 +38,7 @@ function TeamColumn({
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
 
   return (
-    <Card ref={setNodeRef} className="border rounded p-4 min-w-64 gap-0.75">
+    <Card className="border rounded p-4 min-w-64 gap-0.75">
       <div className="flex justify-between items-center px-1 text-sm mb-2">
         <h2 className="tracking-tight text-foreground">{team.name}</h2>
         <span className="inline-flex items-center font-mono tracking-tighter text-card-foreground">
@@ -80,17 +81,24 @@ function TeamColumn({
             })}
         </ul>
       )}
-      <div className="flex flex-col space-y-1.5">
-        {employees.map((emp) => (
-          <EmployeeCard
-            key={emp.id}
-            employee={emp}
-            employeeNotes={employeeNotes}
-            onNoteAdded={onNoteAdded}
-            onNoteDeleted={onNoteDeleted}
-          />
-        ))}
-      </div>
+      <SortableContext
+        key={team.id}
+        id={team.id}
+        items={employees.filter((e) => e.teamId === team.id).map((e) => e.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div ref={setNodeRef} className="flex flex-col space-y-1.5">
+          {employees.map((emp) => (
+            <EmployeeCard
+              key={emp.id}
+              employee={emp}
+              employeeNotes={employeeNotes}
+              onNoteAdded={onNoteAdded}
+              onNoteDeleted={onNoteDeleted}
+            />
+          ))}
+        </div>
+      </SortableContext>
     </Card>
   )
 }
