@@ -52,7 +52,7 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
       >
         <div>
           <div className="font-medium leading-tight flex items-center gap-1">
-            {employee.firstName} {employee.lastName}
+            {employee.firstName} {employee.lastName} {employee.sortIndex} {employee.id}
             {noteCount > 0 && (
               <Badge
                 variant="secondary"

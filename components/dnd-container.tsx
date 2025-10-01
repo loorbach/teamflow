@@ -72,12 +72,10 @@ function DnDContainer({
     return emp?.teamId ?? undefined
   }
 
-  function moveEmployee(employeeId: UniqueIdentifier, teamId: UniqueIdentifier) {
-    fetch('/api/employees/move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ employeeId: employeeId, teamId: teamId }),
-    })
+  function reorderSortIndex(employeesArray: Employee[], teamId: UniqueIdentifier): Employee[] {
+    return employeesArray
+      .filter((emp) => emp.teamId === teamId)
+      .map((emp, idx) => ({ ...emp, sortIndex: idx }))
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -87,72 +85,107 @@ function DnDContainer({
 
   function handleDragOver(event: DragOverEvent) {
     const { active, over } = event
-
     if (!over) return
+    const activeTeamId = findContainerId(active.id)
+    const overTeamId = findContainerId(over.id)
 
-    const activeContainerId = findContainerId(active.id)
-    const overContainerId = findContainerId(over.id)
+    if (!activeTeamId || !overTeamId) return //if active or over container are null, return
+    if (activeTeamId === overTeamId) return //if not dragging between different containers, return
+    if (activeTeamId === overTeamId && active.id !== over.id) return //if active and over are equal, eg dragging in the same container, we dont wanna do anything. this iwll be handled in dragend
 
-    if (!activeContainerId || !overContainerId) return //if active or over container are null, return
-    if (activeContainerId === overContainerId) return //if not dragging between different containers, return
-    if (activeContainerId === overContainerId && active.id !== over.id) return //if active and over are equal, eg dragging in the same container, we dont wanna do anything. this iwll be handled in dragend
-    if (activeContainerId !== overContainerId) {
-      console.log(`${active.id} is being dragged from ${activeContainerId} to ${overContainerId}`)
-      setEmployees((prevEmployees) => {
-        const activeIndex = prevEmployees.findIndex((employeeObj) => employeeObj.id === active.id)
-        console.log(activeIndex)
-        if (activeIndex === -1) return prevEmployees
+    if (activeTeamId !== overTeamId) {
+      console.log(`${active.id} is being dragged from ${activeTeamId} to ${overTeamId}`)
+      // setEmployees((prevEmployees) => {
+      //   const activeIndex = prevEmployees.findIndex((employeeObj) => employeeObj.id === active.id)
+      //   if (activeIndex === -1) return prevEmployees
 
-        const employee = prevEmployees[activeIndex]
-        const updated = [...prevEmployees]
-        updated[activeIndex] = { ...employee, teamId: overContainerId.toString() }
-        return updated
+      //   const employee = prevEmployees[activeIndex]
+      //   const updated = [...prevEmployees]
+      //   updated[activeIndex] = { ...employee, teamId: overTeamId.toString() }
+      //   return updated
+      // })
+    }
+  }
+
+  async function test(affectedEmps: Employee[]) {
+    try {
+      await fetch('/api/employees/bulk-update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application-json' },
+        body: JSON.stringify({
+          employees: affectedEmps.map((e) => ({
+            id: e.id,
+            teamId: e.teamId,
+            sortIndex: e.sortIndex,
+          })),
+        }),
       })
+    } catch (error) {
+      console.error('Failed to persist:', error)
     }
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setDragging(false)
+    setDragging(false) //remove trash droppable
 
-    const { active, over } = event
+    const { active, over } = event //destructure event vars
     if (!over) {
       setActiveId(null)
       return
     }
+
     if (over.id === 'trash') {
-      console.log('over.id trash block', over.id, active.id.toString(), active.id)
       const emp = employees.find((e) => e.id === active.id.toString())
       if (emp) setEmployeeToDelete(emp)
       setActiveId(null)
       return
     }
-    const activeContainerId = findContainerId(active.id)
-    const overContainerId = findContainerId(over.id)
 
-    if (!activeContainerId || !overContainerId) {
+    const activeTeamId = findContainerId(active.id)
+    const overTeamId = findContainerId(over.id)
+    console.log('ids', active.id, over.id, activeTeamId, overTeamId)
+
+    if (!activeTeamId || !overTeamId) {
       setActiveId(null)
       return
     }
 
-    console.log(active.id === over.id)
+    let nextEmployees: Employee[] = employees
 
-    if (activeContainerId === overContainerId && active.id !== over.id) {
-      console.log('attempting to sort inside of same team, using:', active.id, over.id)
+    if (activeTeamId === overTeamId && active.id !== over.id) {
+      console.log('hitting reorder block', activeTeamId, overTeamId)
+      console.log(
+        'previous state of team',
+        employees.filter((e) => e.teamId === overTeamId)
+      )
+      //reordering
       const oldIndex = employees.findIndex((e) => e.id === active.id)
       const newIndex = employees.findIndex((e) => e.id === over.id)
+
       if (oldIndex !== -1 && newIndex !== -1) {
-        setEmployees((prev) => arrayMove(prev, oldIndex, newIndex))
+        const reIndexed = arrayMove(employees, oldIndex, newIndex)
+        const reordered = reorderSortIndex(reIndexed, activeTeamId)
+        console.log('new reordered state', reordered)
+        //reordered is changed team, nextEmployees is overall new state array
+        nextEmployees = [...employees.filter((e) => e.teamId !== activeTeamId), ...reordered]
       }
-      moveEmployee(active.id, overContainerId)
-    } else if (activeContainerId !== overContainerId && active.id !== over.id) {
-      //cross team move
-      console.log('attempting cross team move, trying to replace teamId of ? to', overContainerId)
-      setEmployees((prev) =>
-        prev.map((emp) =>
-          emp.id === active.id ? { ...emp, teamId: overContainerId.toString() } : emp
-        )
+    } else if (activeTeamId !== overTeamId && active.id !== over.id) {
+      // cross team move
+      console.log('hitting crossteam block', activeTeamId, overTeamId)
+      const moved = employees.map((emp) =>
+        emp.id === active.id ? { ...emp, teamId: overTeamId.toString() } : emp
       )
-      moveEmployee(active.id, overContainerId)
+      const reordered = reorderSortIndex(moved, overTeamId)
+      nextEmployees = [...moved.filter((e) => e.teamId !== overTeamId), ...reordered]
+    }
+
+    if (nextEmployees !== employees) {
+      setEmployees(nextEmployees)
+
+      //how do I only send changed teams / employees to backend
+      //how do I update visual state on handleDragOver without losing activeTeamId
+
+      test(nextEmployees)
     }
     console.log('drag ended', event)
   }

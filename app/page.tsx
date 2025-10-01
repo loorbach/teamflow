@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
 import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 
 async function Home() {
@@ -11,7 +11,7 @@ async function Home() {
   if (!session?.user) redirect('/login')
 
   const teamList = await db.select().from(teams)
-  const employeesList = await db.select().from(employees)
+  const employeesList = await db.select().from(employees).orderBy(asc(employees.sortIndex))
   const roleTargetList = await db
     .select({
       teamId: teamRoleTargets.teamId,

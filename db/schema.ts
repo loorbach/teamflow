@@ -122,6 +122,7 @@ export const employees = pgTable('employees', {
     .notNull()
     .references(() => roles.id),
   teamId: text('team_id').references(() => teams.id),
+  sortIndex: integer('sort_index').notNull(),
 })
 
 export const teamRoleTargets = pgTable(
