@@ -3,10 +3,7 @@ import { GripVertical } from 'lucide-react'
 
 function EmployeeCardOverlay({ employee }: { employee: Employee }) {
   return (
-    <div
-      role="button"
-      className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground"
-    >
+    <div className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground">
       <div className="flex justify-between items-center text-sm gap-2">
         <div>
           <div className="font-medium leading-tight flex items-center gap-1">

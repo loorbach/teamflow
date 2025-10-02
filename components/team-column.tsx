@@ -90,7 +90,7 @@ function TeamColumn({
       <SortableContext
         key={team.id}
         id={team.id}
-        items={employees.filter((e) => e.teamId === team.id).map((e) => e.id)}
+        items={employees.map((e) => e.id)}
         strategy={verticalListSortingStrategy}
       >
         <div ref={setNodeRef} className="flex flex-col space-y-1.5">

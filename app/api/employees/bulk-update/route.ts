@@ -9,7 +9,7 @@ const BulkUpdateSchema = z.object({
     .array(
       z.object({
         id: z.string().min(1),
-        teamId: z.string().min(1),
+        teamId: z.string().min(1).optional(),
         sortIndex: z.number().int().min(0),
       })
     )
@@ -22,12 +22,13 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { employees: updates } = BulkUpdateSchema.parse(body)
 
-    console.log('received employees', updates)
+    // console.log('received employees', updates)
+    // console.log(updates.length)
 
     await db.transaction(async (tx) => {
       for (const update of updates) {
-        console.log('iterating over updates, update:', update)
-        console.log('setting teamId and sortIndex of:', update.id, update.teamId, update.sortIndex)
+        // console.log('iterating over updates, update:', update)
+        // console.log('setting teamId and sortIndex of:', update.id, update.teamId, update.sortIndex)
         await tx
           .update(employees)
           .set({
