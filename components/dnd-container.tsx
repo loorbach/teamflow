@@ -16,6 +16,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
+import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -249,10 +250,11 @@ function DnDContainer({
 
     setActiveId(null)
     persistEmployees(payload)
-    toast.success(`${originalEmployee.firstName} ${originalEmployee.lastName} has been moved`, {
-      description: `Click undo to revert this action`,
-      action: { label: 'Undo', onClick: () => console.log('Undo clicked') },
-    })
+    if (payload)
+      toast.success(`${originalEmployee.firstName} ${originalEmployee.lastName} has been moved`, {
+        description: `Click undo to revert this action`,
+        action: { label: 'Undo', onClick: () => console.log('Undo clicked') },
+      })
   }
 
   function handleDragCancel(event: DragCancelEvent) {
@@ -316,6 +318,7 @@ function DnDContainer({
           duration: 150,
           easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
         }}
+        modifiers={[restrictToWindowEdges]}
       >
         {activeId ? <EmployeeCardOverlay employee={getEmployeeById(activeId)!} /> : null}
       </DragOverlay>

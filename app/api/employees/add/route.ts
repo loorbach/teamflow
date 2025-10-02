@@ -9,6 +9,7 @@ const NewEmployeeSchema = z.object({
   fte: z.coerce.number().min(0).max(1),
   roleId: z.string().min(1),
   teamId: z.string().min(1),
+  sortIndex: z.number().int().min(0),
 })
 
 export async function POST(req: Request) {
