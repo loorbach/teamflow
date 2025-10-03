@@ -6,7 +6,6 @@ import {
   DndContext,
   DragCancelEvent,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   KeyboardSensor,
@@ -17,8 +16,8 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { restrictToWindowEdges } from '@dnd-kit/modifiers'
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { useRef, useState } from 'react'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { memo, useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 import EmployeeCardOverlay from './employee-card-overlay'
@@ -26,8 +25,8 @@ import TeamColumn from './team-column'
 import TrashZone from './trash-zone'
 
 type Props = {
-  employees: Employee[]
-  setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>
+  employeesByTeam: Map<string, Employee[]>
+  setEmployeesByTeam: React.Dispatch<React.SetStateAction<Map<string, Employee[]>>>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
@@ -35,9 +34,45 @@ type Props = {
   openTeamMap: Record<string, boolean>
 }
 
+const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
+  let equal = true
+
+  if (prev.team.id !== next.team.id) {
+    console.log('RERENDER: team.id changed', prev.team.id, next.team.id)
+    equal = false
+  }
+
+  if (prev.employees !== next.employees) {
+    console.log('RERENDER: employees reference changed for team', next.team.id)
+    equal = false
+  }
+
+  if (prev.open !== next.open) {
+    console.log('RERENDER: open changed for team', next.team.id)
+    equal = false
+  }
+
+  if (prev.teamRoleTargets !== next.teamRoleTargets) {
+    console.log('RERENDER: teamRoleTargets reference changed')
+    equal = false
+  }
+
+  if (prev.employeeNotes !== next.employeeNotes) {
+    console.log('RERENDER: employeeNotes reference changed')
+    equal = false
+  }
+
+  if (prev.onToggle !== next.onToggle) {
+    console.log('RERENDER: onToggle reference changed for team', next.team.id)
+    equal = false
+  }
+
+  return equal
+})
+
 function DnDContainer({
-  employees,
-  setEmployees,
+  employeesByTeam,
+  setEmployeesByTeam,
   teams,
   teamRoleTargets,
   employeeNotes: initialNotes,
@@ -48,17 +83,10 @@ function DnDContainer({
   const [dragging, setDragging] = useState(false)
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
-  const previousEmployeeRef = useRef<Employee[]>(employees)
-  const lastDragOverTime = useRef<number>(0)
-  const THROTTLE_MS = 50
+  const previousEmployeeRef = useRef<Map<string, Employee[]>>(employeesByTeam)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 0,
-        tolerance: 5,
-      },
-    }),
+    useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -66,93 +94,54 @@ function DnDContainer({
 
   function getEmployeeById(id: UniqueIdentifier | null): Employee | undefined {
     if (!id) return undefined
-    return employees.find((e) => e.id === id)
+    for (const employees of employeesByTeam.values()) {
+      const employee = employees.find((e) => e.id === id)
+      if (employee) return employee
+    }
   }
 
   function findContainerId(itemId: UniqueIdentifier): UniqueIdentifier | undefined {
     if (teams.some((team) => team.id === itemId)) return itemId
 
-    const emp = employees.find((emp) => emp.id === itemId)
-    return emp?.teamId ?? undefined
+    for (const [teamId, employees] of employeesByTeam.entries()) {
+      if (employees.some((emp) => emp.id === itemId)) return teamId
+    }
   }
 
-  function reorderSortIndex(employeesArray: Employee[], teamId: UniqueIdentifier): Employee[] {
-    return employeesArray
-      .filter((emp) => emp.teamId === teamId)
-      .map((emp, idx) => ({ ...emp, sortIndex: idx }))
-  }
-
-  async function persistEmployees(payload: Employee[] | null) {
+  async function persistEmployees(changedEmployees: Employee[] | null) {
     const previousState = previousEmployeeRef.current
-    console.log(payload)
-
-    if (!payload) return
+    if (!changedEmployees) return
+    console.log('sending these to the backend!', changedEmployees)
 
     try {
       await fetch('/api/employees/bulk-update', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          employees: payload.map((e) => ({
+          employees: changedEmployees.map((e) => ({
             id: e.id,
             teamId: e.teamId,
             sortIndex: e.sortIndex,
           })),
         }),
       })
+      toast.success(`Employee has been moved`, {
+        description: `Click undo to revert this action`,
+        action: { label: 'Undo', onClick: () => setEmployeesByTeam(previousState) },
+      })
     } catch (error) {
       console.error('Failed to persist:', error)
-      setEmployees(previousState)
+      setEmployeesByTeam(previousState)
       toast.error('Failed to save changes')
     }
   }
 
   function handleDragStart(event: DragStartEvent) {
     console.log('drag event fired', event.active.id)
-    previousEmployeeRef.current = employees
+    console.log(employeesByTeam)
+    previousEmployeeRef.current = new Map(employeesByTeam)
     setActiveId(event.active.id)
     setDragging(true)
-  }
-
-  function handleDragOver(event: DragOverEvent) {
-    //function is to show visual feedback when dragging between sortableContexts
-    // console.log('handle Drag Over fired')
-    const now = Date.now()
-    // console.log(`last check was ${now - lastDragOverTime.current} ago`)
-    if (now - lastDragOverTime.current < THROTTLE_MS) return
-    lastDragOverTime.current = now
-
-    const { active, over } = event
-    if (!over) return
-    // console.warn(over.id)
-
-    const activeTeamId = findContainerId(active.id)
-    const overTeamId = findContainerId(over.id)
-
-    if (!activeTeamId || !overTeamId) return
-    if (activeTeamId === overTeamId) return
-    if (activeTeamId === overTeamId && active.id !== over.id) return
-
-    if (activeTeamId !== overTeamId) {
-      // console.log('dragging between containers!')
-      // console.log(`${active.id} is being dragged from ${activeTeamId} to ${overTeamId}`)
-
-      setEmployees((prevEmployees) => {
-        const activeIndex = prevEmployees.findIndex((employeeObj) => employeeObj.id === active.id)
-        // console.log('lookup done ,active index is ', activeIndex)
-        if (activeIndex === -1) return prevEmployees
-
-        const employee = prevEmployees[activeIndex]
-        if (employee.teamId === overTeamId) return prevEmployees
-
-        const updated = [...prevEmployees]
-        updated[activeIndex] = { ...employee, teamId: overTeamId.toString() }
-
-        // console.log(`${updated[activeIndex]} now has teamid ${updated[activeIndex].teamId}`)
-        return updated
-      })
-      // console.log('employees now holds an optimistic team representation')
-    }
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -161,154 +150,168 @@ function DnDContainer({
 
     if (!over) {
       setActiveId(null)
-      setEmployees(previousEmployeeRef.current) //revert any preview changes
+      setEmployeesByTeam(previousEmployeeRef.current)
       return
     }
 
     if (over.id === 'trash') {
-      const emp = employees.find((e) => e.id === active.id.toString())
+      const emp = getEmployeeById(active.id)
       if (emp) setEmployeeToDelete(emp)
       setActiveId(null)
       return
     }
 
-    const originalEmployee = previousEmployeeRef.current.find((e) => e.id === active.id)
-    const originalTeamId = originalEmployee?.teamId
+    const activeTeamId = findContainerId(active.id)
     const overTeamId = findContainerId(over.id)
 
-    if (!originalTeamId || !overTeamId) {
+    if (!activeTeamId || !overTeamId) {
       setActiveId(null)
-      setEmployees(previousEmployeeRef.current)
       return
     }
-    let payload: Employee[] | null = null
 
-    setEmployees((prev) => {
-      // console.warn(
-      //   'inside drag end STATE SETTER',
-      //   active.id,
-      //   'is being moved',
-      //   'originating from:',
-      //   originalTeamId,
-      //   'dropping onto',
-      //   over.id,
-      //   'originating in team:',
-      //   overTeamId
-      // )
-      let nextEmployees: Employee[] = prev
-      if (originalTeamId === overTeamId && active.id !== over.id) {
-        //handling same team reorder, has access to unchanged state
-        // console.log('initializing same team reorder')
-        const oldIndex = prev.findIndex((e) => e.id === active.id)
-        const newIndex = prev.findIndex((e) => e.id === over.id)
+    let changedEmployees: Employee[] | null = null
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const reIndexed = arrayMove(prev, oldIndex, newIndex)
-          const reordered = reorderSortIndex(reIndexed, overTeamId) //needs to go to backend
-          payload = reordered
-          nextEmployees = [...prev.filter((e) => e.teamId !== overTeamId), ...reordered]
-        }
-      } else if (originalTeamId !== overTeamId && active.id !== over.id) {
-        //remember teamID has changed on drag over if cross team dragging occurred
-        // console.log('initializing cross team move')
-        const targetTeamEmployees = previousEmployeeRef.current.filter(
-          (e) => e.teamId === overTeamId
-        )
-        // console.log('dropping in team', targetTeamEmployees)
-        const overIndex = targetTeamEmployees.findIndex((e) => e.id === over.id)
-        // console.log('dropping on index', overIndex)
+    setEmployeesByTeam((prevMap) => {
+      const map = new Map(prevMap)
 
-        if (overIndex !== -1 && over.id !== active.id) {
-          targetTeamEmployees.splice(overIndex, 0, originalEmployee)
-          const reordered = targetTeamEmployees.map((emp, idx) => ({
-            ...emp,
-            teamId: overTeamId.toString(),
-            sortIndex: idx,
-          }))
+      if (activeTeamId === overTeamId && active.id !== over.id) {
+        const teamId = activeTeamId.toString()
+        const oldArray = map.get(teamId)
+        if (!oldArray) return map
 
-          // console.log('cross payload', reordered)
+        const newArray = [...oldArray]
+        const oldIndex = newArray.findIndex((e) => e.id === active.id)
+        const newIndex = newArray.findIndex((e) => e.id === over.id)
+        if (oldIndex === -1 || newIndex === -1) return map
 
-          payload = reordered
+        const [moved] = newArray.splice(oldIndex, 1)
+        console.log(moved)
+        newArray.splice(newIndex, 0, moved)
+        newArray.forEach((e, i) => (e.sortIndex = i))
+        changedEmployees = newArray
 
-          // console.log('placed employee and reordered, also replaced teamids', reordered)
+        map.set(teamId, newArray)
+      } else if (activeTeamId !== overTeamId) {
+        const sourceId = activeTeamId.toString()
+        const targetId = overTeamId.toString()
+        const sourceArray = map.get(sourceId)
+        const targetArray = map.get(targetId)
+        if (!sourceArray || !targetArray) return map
 
-          nextEmployees = [...prev.filter((e) => e.teamId !== overTeamId), ...reordered]
-        }
+        const newSource = [...sourceArray]
+        const newTarget = [...targetArray]
+
+        const sourceIndex = newSource.findIndex((e) => e.id === active.id)
+        const targetIndex = newTarget.findIndex((e) => e.id === over.id)
+        if (sourceIndex === -1 || targetIndex === -1) return map
+
+        const [moved] = newSource.splice(sourceIndex, 1)
+        moved.teamId = targetId
+        newTarget.splice(targetIndex, 0, moved)
+
+        newSource.forEach((e, i) => (e.sortIndex = i))
+        newTarget.forEach((e, i) => (e.sortIndex = i))
+        changedEmployees = newSource.concat(newTarget)
+
+        map.set(sourceId, newSource)
+        map.set(targetId, newTarget)
       }
-      return nextEmployees
+
+      return map
     })
 
-    //TODO:
-
-    //make route handle more efficiently with claude - dont make 10 sql statements
-    //todo solve error when dropping in between team columns
-    //solve jittery movement in chrome
-    //minimize calls
-    //optimize
-
-    //persist to backend
-
     setActiveId(null)
-    persistEmployees(payload)
-    if (payload)
-      toast.success(`${originalEmployee.firstName} ${originalEmployee.lastName} has been moved`, {
-        description: `Click undo to revert this action`,
-        action: { label: 'Undo', onClick: () => console.log('Undo clicked') },
-      })
+    if (changedEmployees) persistEmployees(changedEmployees)
   }
 
   function handleDragCancel(event: DragCancelEvent) {
     setActiveId(null)
     setDragging(false)
-    setEmployees(previousEmployeeRef.current) //revert any preview changes
+    setEmployeesByTeam(previousEmployeeRef.current) //revert any preview changes
     void event
   }
+
+  const handleNoteAdded = useCallback((note: EmployeeNote) => {
+    setEmployeeNotes((prev) => [...prev, note])
+  }, [])
+
+  const handleNoteDeleted = useCallback((noteId: string) => {
+    setEmployeeNotes((prev) => prev.filter((n) => n.id !== noteId))
+  }, [])
+
+  const stableToggle = useCallback(
+    (teamId: string) => {
+      toggleOneTeam(teamId)
+    },
+    [toggleOneTeam]
+  )
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
+      // onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
       measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging, frequency: 200 } }}
     >
       <div className="flex gap-4 flex-wrap px-4 py-2">
-        {teams.map((team) => (
-          <TeamColumn
-            key={team.id}
-            team={team}
-            employees={employees.filter((e) => e.teamId === team.id)}
-            teamRoleTargets={teamRoleTargets}
-            employeeNotes={employeeNotes}
-            onNoteAdded={(note) => setEmployeeNotes((prev) => [...prev, note])}
-            onNoteDeleted={(noteId) =>
-              setEmployeeNotes((prev) => prev.filter((n) => n.id !== noteId))
-            }
-            onToggle={() => toggleOneTeam(team.id)}
-            open={!!openTeamMap[team.id]}
-          />
-        ))}
+        {teams.map((team) => {
+          const teamEmployees = employeesByTeam.get(team.id) ?? []
+          return (
+            <MemoizedTeamColumn
+              key={team.id}
+              team={team}
+              employees={teamEmployees}
+              teamRoleTargets={teamRoleTargets}
+              employeeNotes={employeeNotes}
+              onNoteAdded={handleNoteAdded}
+              onNoteDeleted={handleNoteDeleted}
+              onToggle={() => stableToggle(team.id)}
+              open={!!openTeamMap[team.id]}
+            />
+          )
+        })}
       </div>
       {employeeToDelete && (
         <ConfirmDeleteDialog
           open={!!employeeToDelete}
           onCancel={() => setEmployeeToDelete(null)}
           onConfirm={async () => {
-            setEmployees((prev) => prev.filter((e) => e.id !== employeeToDelete.id))
-
-            await fetch('/api/employees/delete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ employeeId: employeeToDelete.id }),
+            const previousState = previousEmployeeRef.current
+            setEmployeesByTeam((prev) => {
+              const newMap = new Map(prev)
+              const teamId = employeeToDelete.teamId
+              if (!employeeToDelete || !teamId) return
+              const teamEmployees = newMap.get(teamId) ?? []
+              newMap.set(
+                teamId,
+                teamEmployees.filter((e) => e.id !== employeeToDelete.id)
+              )
+              return newMap
             })
+            try {
+              await fetch('/api/employees/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId: employeeToDelete.id }),
+              })
 
-            toast('Employee Removed', {
-              description: `${employeeToDelete.firstName} ${employeeToDelete.lastName} has been removed.`,
-            })
+              toast.success(`Employee has been removed`, {
+                description: `Click undo to revert this action`,
+                action: {
+                  label: 'Undo',
+                  onClick: () => setEmployeesByTeam(previousState),
+                },
+              })
 
-            setEmployeeToDelete(null)
+              setEmployeeToDelete(null)
+            } catch (error) {
+              console.error('Failed to persist:', error)
+              setEmployeesByTeam(previousState)
+              toast.error('Failed to save changes')
+            }
           }}
         />
       )}

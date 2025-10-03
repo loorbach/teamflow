@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
 import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
+import { Employee } from '@/db/types'
 import { asc, eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 
@@ -12,6 +13,15 @@ async function Home() {
 
   const teamList = await db.select().from(teams)
   const employeesList = await db.select().from(employees).orderBy(asc(employees.sortIndex))
+
+  const employeesByTeam = new Map<string, Employee[]>()
+  teamList.forEach((team) => employeesByTeam.set(team.id, []))
+  employeesList.forEach((employee) => {
+    if (!employee || !employee.teamId) return
+    const teamEmployees = employeesByTeam.get(employee.teamId)
+    if (teamEmployees) teamEmployees.push(employee)
+  })
+
   const roleTargetList = await db
     .select({
       teamId: teamRoleTargets.teamId,
@@ -26,7 +36,7 @@ async function Home() {
   return (
     <HomeWrapper
       teams={teamList}
-      initialEmployees={employeesList}
+      initialEmployees={Object.fromEntries(employeesByTeam)}
       teamRoleTargets={roleTargetList}
       employeeNotes={employeeNoteList}
     />

@@ -27,7 +27,7 @@ export async function PATCH(request: NextRequest) {
 
     await db.transaction(async (tx) => {
       for (const update of updates) {
-        // console.log('iterating over updates, update:', update)
+        console.log('iterating over updates, update:', update)
         // console.log('setting teamId and sortIndex of:', update.id, update.teamId, update.sortIndex)
         await tx
           .update(employees)

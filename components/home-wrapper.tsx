@@ -7,14 +7,16 @@ import DnDContainer from './dnd-container'
 import Header from './header'
 
 type Props = {
-  initialEmployees: Employee[] //SELECT * FROM employees
+  initialEmployees: Record<string, Employee[]>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
   employeeNotes: EmployeeNote[]
 }
 
 function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }: Props) {
-  const [employeeList, setEmployeeList] = useState<Employee[]>(initialEmployees)
+  const [employeesByTeam, setEmployeesByTeam] = useState<Map<string, Employee[]>>(
+    () => new Map(Object.entries(initialEmployees))
+  )
   const [openTeamMap, setOpenTeamMap] = useState<Record<string, boolean>>({})
 
   const allTeamsOpen = teams.every((team) => openTeamMap[team.id])
@@ -36,15 +38,15 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
   return (
     <>
       <Header
-        onEmployeeAdded={(newEmp: Employee) => setEmployeeList((prev) => [...prev, newEmp])}
+        onEmployeeAdded={() => {}}
         toggleAllTeams={toggleAllTeams}
         allTeamsOpen={allTeamsOpen}
       />
 
       <DnDContainer
         teams={teams}
-        employees={employeeList}
-        setEmployees={setEmployeeList}
+        employeesByTeam={employeesByTeam}
+        setEmployeesByTeam={setEmployeesByTeam}
         teamRoleTargets={teamRoleTargets}
         employeeNotes={employeeNotes}
         toggleOneTeam={toggleOneTeam}

@@ -37,7 +37,7 @@ function TeamColumn({
   const teamTotalFte = teamRoleTargets
     .filter((obj) => obj.teamId === team.id)
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
-  console.log(`TeamColumn rerender: ${team.id}`)
+  // console.log(`TeamColumn rerender: ${team.id}`)
 
   return (
     <Card className="border rounded p-4 min-w-64 gap-0.75">
