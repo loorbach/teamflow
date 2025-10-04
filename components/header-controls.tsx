@@ -6,16 +6,14 @@ import { Toggle } from './ui/toggle'
 
 type Props = {
   onEmployeeAdded: (employee: Employee) => void
-  toggleAllTeams: () => void
-  allTeamsOpen: boolean
 }
 
-function HeaderControls({ onEmployeeAdded, toggleAllTeams, allTeamsOpen }: Props) {
+function HeaderControls({ onEmployeeAdded }: Props) {
   return (
     <div className="flex items-center gap-2">
       <Toggle
-        pressed={allTeamsOpen}
-        onPressedChange={toggleAllTeams}
+        // pressed={allTeamsOpen}
+        // onPressedChange={toggleAllTeams}
         className="hover:cursor-pointer"
         aria-label="Toggle all teams"
       >

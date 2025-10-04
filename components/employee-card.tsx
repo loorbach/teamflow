@@ -3,9 +3,8 @@
 import { addNote, deleteNote } from '@/app/actions/notes'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Employee, EmployeeNote } from '@/db/types'
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { CirclePlus, GripVertical, Trash } from 'lucide-react'
+import { useSortable } from '@dnd-kit/react/sortable'
+import { CirclePlus, Trash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -16,11 +15,24 @@ type Props = {
   employeeNotes: EmployeeNote[]
   onNoteAdded: (note: EmployeeNote) => void
   onNoteDeleted: (noteId: string) => void
+  index: number
+  teamId: string
 }
 
-function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: Props) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function EmployeeCard({
+  employee,
+  employeeNotes,
+  onNoteAdded,
+  onNoteDeleted,
+  index,
+  teamId,
+}: Props) {
+  const { ref, isDragging } = useSortable({
     id: employee.id,
+    index,
+    type: 'employee',
+    accept: 'employee',
+    group: teamId,
   })
   const [expanded, setExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
@@ -31,28 +43,18 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
   )
   const noteCount = notesForEmployee.length
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
   return (
     <div
-      ref={setNodeRef}
-      style={style}
+      ref={ref}
+      data-dragging={isDragging}
       role="button"
-      className={`w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground ${isDragging && 'z-10 opacity-50 shadow-md'}`}
+      className={`w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground`}
+      onClick={() => setExpanded((prev) => !prev)}
     >
-      <div
-        className="flex justify-between items-center text-sm gap-2"
-        onClick={(e) => {
-          if ((e.target as HTMLElement).closest('[data-drag-handle]')) return
-          setExpanded(!expanded)
-        }}
-      >
+      <div className="flex justify-between items-center text-sm gap-2">
         <div>
           <div className="font-medium leading-tight flex items-center gap-1">
-            {employee.firstName} {employee.lastName} {employee.sortIndex} {employee.id}
+            {employee.firstName} {employee.lastName} {employee.sortIndex} {employee.id} {teamId}
             {noteCount > 0 && (
               <Badge
                 variant="secondary"
@@ -66,9 +68,6 @@ function EmployeeCard({ employee, employeeNotes, onNoteAdded, onNoteDeleted }: P
         </div>
         <div className="flex items-center gap-2">
           <div className="text-xs font-mono text-right">{employee.fte}</div>
-          <div {...listeners} {...attributes} data-drag-handle>
-            <GripVertical className="w-6 h-6 cursor-grab active:cursor-grabbing hover:bg-gray-200 rounded text-muted-foreground hover:text-blue-600 transition-colors duration-200" />
-          </div>
         </div>
       </div>
       {expanded && (

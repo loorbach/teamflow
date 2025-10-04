@@ -1,15 +1,16 @@
 'use client'
 
 import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
-import { useDroppable } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CollisionPriority } from '@dnd-kit/abstract'
+import { useDroppable } from '@dnd-kit/react'
 import { motion } from 'framer-motion'
 import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
-import dynamic from 'next/dynamic'
+import { useState } from 'react'
+import EmployeeCard from './employee-card'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 
-const EmployeeCard = dynamic(() => import('./employee-card'), { ssr: false })
+// const EmployeeCard = dynamic(() => import('./employee-card'), { ssr: false })
 
 type Props = {
   team: Team
@@ -18,8 +19,6 @@ type Props = {
   employeeNotes: EmployeeNote[]
   onNoteAdded: (note: EmployeeNote) => void
   onNoteDeleted: (noteId: string) => void
-  onToggle: () => void
-  open: boolean
 }
 
 function TeamColumn({
@@ -29,27 +28,38 @@ function TeamColumn({
   employeeNotes,
   onNoteAdded,
   onNoteDeleted,
-  onToggle,
-  open,
 }: Props) {
-  const { setNodeRef } = useDroppable({ id: team.id })
+  const [open, setOpen] = useState<boolean>(false)
+  const { isDropTarget, ref } = useDroppable({
+    id: team.id,
+    type: 'team',
+    accept: 'employee',
+    collisionPriority: CollisionPriority.Low,
+  })
   const currentTotalFte = employees.reduce((acc, el) => acc + el.fte, 0)
   const teamTotalFte = teamRoleTargets
     .filter((obj) => obj.teamId === team.id)
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
-  // console.log(`TeamColumn rerender: ${team.id}`)
+  console.log(`TeamColumn rerender: ${team.id}`)
+
+  const style = isDropTarget ? { background: '#00000030' } : undefined
 
   return (
     <Card className="border rounded p-4 min-w-64 gap-0.75">
       <div className="flex justify-between items-center px-1 text-sm mb-2">
-        <h2 className="tracking-tight text-foreground">{team.name}</h2>
+        <h2 className="tracking-tight text-foreground">{team.id}</h2>
         <span className="inline-flex items-center font-mono tracking-tighter text-card-foreground">
           {currentTotalFte.toFixed(1)}/{teamTotalFte.toFixed(1)}
           {Math.abs(currentTotalFte - teamTotalFte) > 1 && (
             <TriangleAlert className="ml-2 size-4 text-[var(--destructive)]" strokeWidth={2} />
           )}
         </span>
-        <Button variant="secondary" size="icon" className="size-6" onClick={onToggle}>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="size-6"
+          onClick={() => setOpen((prev) => !prev)}
+        >
           <ChevronsUpDown />
         </Button>
       </div>
@@ -88,24 +98,24 @@ function TeamColumn({
             })}
         </motion.ul>
       )}
-      <SortableContext
-        key={team.id}
-        id={team.id}
-        items={employees.map((e) => e.id)}
-        strategy={verticalListSortingStrategy}
+
+      <div
+        ref={ref}
+        style={style}
+        className="flex flex-col space-y-1.5 border border-red-400 min-h-50"
       >
-        <div ref={setNodeRef} className="flex flex-col space-y-1.5">
-          {employees.map((emp) => (
-            <EmployeeCard
-              key={emp.id}
-              employee={emp}
-              employeeNotes={employeeNotes}
-              onNoteAdded={onNoteAdded}
-              onNoteDeleted={onNoteDeleted}
-            />
-          ))}
-        </div>
-      </SortableContext>
+        {employees.map((emp, idx) => (
+          <EmployeeCard
+            key={emp.id}
+            employee={emp}
+            teamId={team.id}
+            index={idx}
+            employeeNotes={employeeNotes}
+            onNoteAdded={onNoteAdded}
+            onNoteDeleted={onNoteDeleted}
+          />
+        ))}
+      </div>
     </Card>
   )
 }
