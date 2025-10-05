@@ -55,7 +55,7 @@ function DnDContainer({
   }, [])
 
   return (
-    <div className="flex gap-4 flex-wrap px-4 py-2">
+    <div className="flex gap-4 flex-wrap px-4 py-2 items-start">
       {teams.map((team) => {
         const teamEmployees = employeesByTeam.get(team.id) ?? []
         return (

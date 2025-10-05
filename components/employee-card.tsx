@@ -54,7 +54,7 @@ function EmployeeCard({
       <div className="flex justify-between items-center text-sm gap-2">
         <div>
           <div className="font-medium leading-tight flex items-center gap-1">
-            {employee.firstName} {employee.lastName} {employee.sortIndex} {employee.id} {teamId}
+            {employee.firstName} {employee.lastName} {employee.sortIndex}
             {noteCount > 0 && (
               <Badge
                 variant="secondary"

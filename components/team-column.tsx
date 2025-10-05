@@ -34,7 +34,7 @@ function TeamColumn({
     id: team.id,
     type: 'team',
     accept: 'employee',
-    collisionPriority: CollisionPriority.Low,
+    collisionPriority: CollisionPriority.Lowest,
   })
   const currentTotalFte = employees.reduce((acc, el) => acc + el.fte, 0)
   const teamTotalFte = teamRoleTargets
@@ -99,11 +99,7 @@ function TeamColumn({
         </motion.ul>
       )}
 
-      <div
-        ref={ref}
-        style={style}
-        className="flex flex-col space-y-1.5 border border-red-400 min-h-50"
-      >
+      <div ref={ref} style={style} className="flex flex-col space-y-1.5 border min-h-[43.5px]">
         {employees.map((emp, idx) => (
           <EmployeeCard
             key={emp.id}
