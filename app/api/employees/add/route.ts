@@ -1,6 +1,6 @@
 import { db } from '@/db/client'
 import { employees } from '@/db/schema'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const NewEmployeeSchema = z.object({
@@ -12,34 +12,26 @@ const NewEmployeeSchema = z.object({
   sortIndex: z.number().int().min(0),
 })
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    console.log(body)
     const parsed = NewEmployeeSchema.parse(body)
+    console.log(parsed)
 
-    const newEmployee = {
-      id: crypto.randomUUID(),
-      ...parsed,
-    }
-
-    await db.insert(employees).values(newEmployee)
+    const [newEmployee] = await db.insert(employees).values(parsed).returning()
+    console.log(newEmployee)
 
     return NextResponse.json(newEmployee, { status: 201 })
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      const fieldErrors = err.issues.reduce(
-        (acc, issue) => {
-          const field = issue.path[0] as string
-          acc[field] = issue.message
-          return acc
-        },
-        {} as Record<string, string>
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.log('zod error')
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.issues },
+        { status: 400 }
       )
-
-      return NextResponse.json({ error: fieldErrors }, { status: 400 })
     }
-
-    console.error(err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('POST error', error)
+    return NextResponse.json({ error: 'Failed to update employees' }, { status: 500 })
   }
 }

@@ -112,9 +112,7 @@ export const teams = pgTable('teams', {
 })
 
 export const employees = pgTable('employees', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   fte: real('fte').notNull(),
@@ -145,7 +143,7 @@ export const employeeNotes = pgTable('employee_notes', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  employeeId: text('employee_id')
+  employeeId: integer('employee_id')
     .notNull()
     .references(() => employees.id, {
       onDelete: 'cascade',

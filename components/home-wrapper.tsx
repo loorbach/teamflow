@@ -26,7 +26,9 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
   const previousEmployeeRef = useRef<Map<UniqueIdentifier, Employee[]>>(employeesByTeam)
   const [dragging, setDragging] = useState(false)
 
-  function getEmployeeById(id: string | null): Employee | undefined {
+  console.log(employeesByTeam)
+
+  function getEmployeeById(id: number | null): Employee | undefined {
     if (!id) return undefined
     for (const employees of employeesByTeam.values()) {
       const employee = employees.find((e) => e.id === id)
@@ -34,7 +36,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
     }
   }
 
-  function findContainerId(itemId: string): UniqueIdentifier | undefined {
+  function findContainerId(itemId: number | string): UniqueIdentifier | undefined {
     if (teams.some((team) => team.id === itemId)) return itemId
 
     for (const [teamId, employees] of employeesByTeam.entries()) {
@@ -204,7 +206,6 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
     <>
       <Header onEmployeeAdded={() => {}} />
       <DragDropProvider
-        // onDragOver={handleDragOver}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}

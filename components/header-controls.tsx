@@ -1,11 +1,10 @@
 'use client'
-import { Employee } from '@/db/types'
 import { FoldVertical } from 'lucide-react'
 import { AddEmployeeDialog } from './add-employee-dialog'
 import { Toggle } from './ui/toggle'
 
 type Props = {
-  onEmployeeAdded: (employee: Employee) => void
+  onEmployeeAdded: (employee) => void
 }
 
 function HeaderControls({ onEmployeeAdded }: Props) {
