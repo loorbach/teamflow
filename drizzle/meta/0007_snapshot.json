@@ -1,5 +1,5 @@
 {
-  "id": "ec294a68-3615-4ed9-9dd5-9143c34f8651",
+  "id": "cc034d03-03b1-473e-ab5d-de495719ee12",
   "prevId": "dde011cc-81b6-4979-80c4-ada41b123d34",
   "version": "7",
   "dialect": "postgresql",
@@ -257,20 +257,9 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "employees_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "notNull": true
         },
         "first_name": {
           "name": "first_name",
@@ -309,7 +298,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_employees_team_id": {
+          "name": "idx_employees_team_id",
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "employees_role_id_roles_id_fk": {
           "name": "employees_role_id_roles_id_fk",

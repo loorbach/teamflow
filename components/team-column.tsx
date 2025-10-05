@@ -10,8 +10,6 @@ import EmployeeCard from './employee-card'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 
-// const EmployeeCard = dynamic(() => import('./employee-card'), { ssr: false })
-
 type Props = {
   team: Team
   employees: Employee[]

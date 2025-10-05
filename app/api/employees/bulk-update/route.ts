@@ -8,7 +8,7 @@ const BulkUpdateSchema = z.object({
   employees: z
     .array(
       z.object({
-        id: z.number().int().min(1),
+        id: z.uuid(),
         teamId: z.string().min(1).optional(),
         sortIndex: z.number().int().min(0),
       })

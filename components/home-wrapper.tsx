@@ -28,7 +28,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
 
   console.log(employeesByTeam)
 
-  function getEmployeeById(id: number | null): Employee | undefined {
+  function getEmployeeById(id: string | null): Employee | undefined {
     if (!id) return undefined
     for (const employees of employeesByTeam.values()) {
       const employee = employees.find((e) => e.id === id)
@@ -204,7 +204,23 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
 
   return (
     <>
-      <Header onEmployeeAdded={() => {}} />
+      <Header
+        onEmployeeAdded={(newEmployee: Employee) => {
+          setEmployeesByTeam((prevMap) => {
+            const newMap = new Map(prevMap)
+            const teamId = newEmployee.teamId
+            if (!teamId) return prevMap
+
+            const teamEmployees = prevMap.get(teamId) ?? []
+
+            const updated = [...teamEmployees, newEmployee]
+
+            newMap.set(teamId, updated)
+
+            return newMap
+          })
+        }}
+      />
       <DragDropProvider
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}

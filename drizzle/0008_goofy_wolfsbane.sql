@@ -1,1 +1,0 @@
-ALTER TABLE "employee_notes" ALTER COLUMN "employee_id" SET DATA TYPE integer;

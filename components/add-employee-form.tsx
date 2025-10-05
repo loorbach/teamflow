@@ -11,7 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Employee } from '@/db/types'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Slider } from './ui/slider'
 
 const roles = [
@@ -48,14 +50,33 @@ function AddEmployeeForm({
       onSubmit={async (e) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        const newEmployee: SendEmployee = {
+        const newEmployee = {
           firstName: formData.get('firstName') as string,
           lastName: formData.get('lastName') as string,
           fte: fte,
           roleId: roleId,
           teamId: teamId,
         }
-        onEmployeeAdded(newEmployee)
+
+        try {
+          const res = await fetch('/api/employees/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newEmployee),
+          })
+
+          if (res.ok) {
+            const resEmployee: Employee = await res.json()
+            if (!resEmployee || !resEmployee.teamId) return
+            console.warn('resemp!!', resEmployee)
+            const validEmployee = { ...resEmployee, teamId: resEmployee.teamId }
+            onEmployeeAdded(validEmployee)
+            onClose()
+          }
+        } catch (error) {
+          console.error('Failed to persist:', error)
+          toast.error('Failed to save new employee')
+        }
       }}
       className="flex flex-col gap-4"
     >
