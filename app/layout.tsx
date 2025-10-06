@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <main>{children}</main>
-          <Toaster position="top-center" toastOptions={{ className: 'mt-6' }} />
+          <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>

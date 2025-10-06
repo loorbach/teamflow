@@ -11,8 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Employee } from '@/db/types'
+import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Slider } from './ui/slider'
 
 const roles = [
@@ -25,43 +26,58 @@ const roles = [
   { label: 'Senior Developer', value: 'role-sr' },
 ]
 
+type SendEmployee = {
+  firstName: string
+  lastName: string
+  fte: number
+  roleId: string
+  teamId: string
+  notes: EmployeeNote[]
+}
+
 function AddEmployeeForm({
   onEmployeeAdded,
   onClose,
 }: {
-  onEmployeeAdded: (employee: Employee) => void
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
   onClose: () => void
 }) {
   const [fte, setFte] = useState<number>(1.0)
-  const [roleId, setRoleId] = useState<string | undefined>('')
-  const [teamId, setTeamId] = useState<string | undefined>('')
+  const [roleId, setRoleId] = useState<string>('')
+  const [teamId, setTeamId] = useState<string>('')
 
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        const newEmployee = {
+        const newEmployee: SendEmployee = {
           firstName: formData.get('firstName') as string,
           lastName: formData.get('lastName') as string,
-          fte: formData.get('fte') as string,
-          roleId: formData.get('roleId') as string,
-          teamId: formData.get('teamId') as string,
+          fte: fte,
+          roleId: roleId,
+          teamId: teamId,
+          notes: [],
         }
 
-        const res = await fetch('/api/employees/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newEmployee),
-        })
+        try {
+          const res = await fetch('/api/employees/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newEmployee),
+          })
 
-        if (res.ok) {
-          const savedEmployee = await res.json()
-          onEmployeeAdded(savedEmployee)
-          onClose()
-        } else {
-          console.error('Failed to add employee')
-          // Optional: Show error to user
+          if (res.ok) {
+            const resEmployee: EmployeeWithNotes = await res.json()
+            if (!resEmployee || !resEmployee.teamId) return
+            console.warn('resemp!!', resEmployee)
+            const validEmployee = { ...resEmployee, teamId: resEmployee.teamId }
+            onEmployeeAdded(validEmployee)
+            onClose()
+          }
+        } catch (error) {
+          console.error('Failed to persist:', error)
+          toast.error('Failed to save new employee')
         }
       }}
       className="flex flex-col gap-4"

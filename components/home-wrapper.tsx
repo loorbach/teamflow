@@ -1,55 +1,281 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
-import { useState } from 'react'
+import { Employee, EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { UniqueIdentifier } from '@dnd-kit/abstract'
+import { RestrictToWindow } from '@dnd-kit/dom/modifiers'
+import { DragDropProvider } from '@dnd-kit/react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 import DnDContainer from './dnd-container'
-
 import Header from './header'
+import TrashZone from './trash-zone'
 
 type Props = {
-  initialEmployees: Employee[]
+  initialEmployees: Record<string, EmployeeWithNotes[]>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
-  employeeNotes: EmployeeNote[]
 }
 
-function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }: Props) {
-  const [employeeList, setEmployeeList] = useState<Employee[]>(initialEmployees)
-  const [openTeamMap, setOpenTeamMap] = useState<Record<string, boolean>>({})
+function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
+  const [employeesByTeam, setEmployeesByTeam] = useState<
+    Map<UniqueIdentifier, EmployeeWithNotes[]>
+  >(() => new Map(Object.entries(initialEmployees)))
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeWithNotes | null>(null)
+  const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam)
+  const [dragging, setDragging] = useState(false)
 
-  const allTeamsOpen = teams.every((team) => openTeamMap[team.id])
+  console.log(employeesByTeam)
 
-  const toggleOneTeam = (teamId: string) => {
-    setOpenTeamMap((prev) => ({
-      ...prev,
-      [teamId]: !prev[teamId],
-    }))
+  function getEmployeeById(id: string | null): EmployeeWithNotes | undefined {
+    if (!id) return undefined
+    for (const employees of employeesByTeam.values()) {
+      const employee = employees.find((e) => e.id === id)
+      if (employee) return employee
+    }
   }
 
-  const toggleAllTeams = () => {
-    const allOpen = teams.every((team) => openTeamMap[team.id])
-    const newMap = Object.fromEntries(teams.map((team) => [team.id, !allOpen]))
+  function findContainerId(itemId: number | string): UniqueIdentifier | undefined {
+    if (teams.some((team) => team.id === itemId)) return itemId
 
-    setOpenTeamMap(newMap)
+    for (const [teamId, employees] of employeesByTeam.entries()) {
+      if (employees.some((emp) => emp.id === itemId)) return teamId
+    }
+  }
+
+  async function persistEmployees(changedEmployees: Employee[] | null) {
+    const previousState = previousEmployeeRef.current
+    if (!changedEmployees) return
+    console.log('sending these to the backend!', changedEmployees)
+
+    try {
+      await fetch('/api/employees/bulk-update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employees: changedEmployees.map((e) => ({
+            id: e.id,
+            teamId: e.teamId,
+            sortIndex: e.sortIndex,
+          })),
+        }),
+      })
+      toast.success(`Employee has been moved`, {
+        description: `Click undo to revert this action`,
+        action: { label: 'Undo', onClick: () => setEmployeesByTeam(previousState) },
+      })
+    } catch (error) {
+      console.error('Failed to persist:', error)
+      setEmployeesByTeam(previousState)
+      toast.error('Failed to save changes')
+    }
+  }
+
+  function handleDragStart() {
+    previousEmployeeRef.current = new Map(employeesByTeam)
+    setDragging(true)
+  }
+
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleDragOver(event) {
+    event.preventDefault()
+    // const { source, target } = event.operation
+    // if (!target) return
+    // console.log('source', source.id) // ← always equals target when e.prevD is not used
+    // console.log('target', target.id)
+    // console.log(isSortable(event.operation.target))
+  }
+
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleDragEnd(event) {
+    const { source, target } = event.operation
+    const { canceled } = event
+
+    setDragging(false)
+
+    if (canceled) {
+      console.log(`Cancelled dragging ${source.id}`)
+      setDragging(false)
+      setEmployeesByTeam(previousEmployeeRef.current)
+      return
+    }
+
+    if (!target) {
+      setEmployeesByTeam(previousEmployeeRef.current)
+      return
+    }
+
+    if (target.id === 'trash') {
+      const emp = getEmployeeById(source.id)
+      if (emp) setEmployeeToDelete(emp)
+      return
+    }
+
+    console.log(`Dropped ${source.id} over ${target.id}`)
+
+    const sourceTeamId = findContainerId(source.id)
+    const targetTeamId = findContainerId(target.id)
+    console.log('teamids', sourceTeamId, targetTeamId)
+
+    if (!sourceTeamId || !targetTeamId) {
+      return
+    }
+
+    setEmployeesByTeam((prevMap) => {
+      let changedEmployees: EmployeeWithNotes[] | null = null
+      const map = new Map(prevMap)
+
+      if (sourceTeamId === targetTeamId && source.id !== target.id) {
+        console.warn('initiating reorder')
+        const teamId = sourceTeamId.toString()
+        const oldArray = map.get(teamId)
+        if (!oldArray) return map
+
+        const newArray = [...oldArray]
+        const oldIndex = newArray.findIndex((e) => e.id === source.id)
+        const newIndex = newArray.findIndex((e) => e.id === target.id)
+
+        if (oldIndex === -1 || newIndex === -1) return map
+
+        const [moved] = newArray.splice(oldIndex, 1)
+        newArray.splice(newIndex, 0, moved)
+        newArray.forEach((e, i) => (e.sortIndex = i))
+        changedEmployees = newArray
+
+        map.set(teamId, newArray)
+      } else if (sourceTeamId !== targetTeamId) {
+        console.warn('initializing cross team move')
+
+        const sourceId = sourceTeamId.toString()
+        const targetId = targetTeamId.toString()
+
+        const sourceArray = map.get(sourceId)
+        const targetArray = map.get(targetId)
+        if (!sourceArray || !targetArray) return map
+
+        const newSource = [...sourceArray]
+        const newTarget = [...targetArray]
+        const sourceIndex = newSource.findIndex((e) => e.id === source.id)
+        if (sourceIndex === -1) return map
+
+        const isTargetTeam = teams.some((team) => team.id === target.id)
+        let targetIndex = 0
+
+        if (isTargetTeam) {
+          // Case 1 & 2: Dropping on a team
+          if (targetArray.length === 0) {
+            // Case 2: Empty team - append to end (index 0)
+            console.log('dropping on empty team')
+            targetIndex = 0
+          } else {
+            // Case 1: Team with employees - append to end
+            console.log('dropping on team with employees')
+            targetIndex = newTarget.length
+          }
+        } else {
+          // Target is an employee
+          targetIndex = newTarget.findIndex((e) => e.id === target.id)
+          if (targetIndex === -1) return map
+        }
+
+        console.log(sourceIndex)
+        console.log(targetIndex)
+
+        const [moved] = newSource.splice(sourceIndex, 1)
+        moved.teamId = targetId
+        newTarget.splice(targetIndex, 0, moved)
+
+        newSource.forEach((e, i) => (e.sortIndex = i))
+        newTarget.forEach((e, i) => (e.sortIndex = i))
+        changedEmployees = newSource.concat(newTarget)
+
+        map.set(sourceId, newSource)
+        map.set(targetId, newTarget)
+      }
+
+      if (changedEmployees) {
+        console.log('calling persist')
+        persistEmployees(changedEmployees)
+      }
+      return map
+    })
   }
 
   return (
     <>
       <Header
-        onEmployeeAdded={(newEmp: Employee) => setEmployeeList((prev) => [...prev, newEmp])}
-        toggleAllTeams={toggleAllTeams}
-        allTeamsOpen={allTeamsOpen}
-      />
+        onEmployeeAdded={(newEmployee: EmployeeWithNotes) => {
+          setEmployeesByTeam((prevMap) => {
+            const newMap = new Map(prevMap)
+            const teamId = newEmployee.teamId
+            if (!teamId) return prevMap
 
-      <DnDContainer
-        teams={teams}
-        employees={employeeList}
-        setEmployees={setEmployeeList}
-        teamRoleTargets={teamRoleTargets}
-        employeeNotes={employeeNotes}
-        toggleOneTeam={toggleOneTeam}
-        openTeamMap={openTeamMap}
+            const teamEmployees = prevMap.get(teamId) ?? []
+
+            const updated = [...teamEmployees, newEmployee]
+
+            newMap.set(teamId, updated)
+
+            return newMap
+          })
+        }}
       />
+      <DragDropProvider
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        modifiers={[RestrictToWindow]}
+      >
+        <DnDContainer
+          teams={teams}
+          employeesByTeam={employeesByTeam}
+          teamRoleTargets={teamRoleTargets}
+        />
+        {employeeToDelete && (
+          <ConfirmDeleteDialog
+            open={!!employeeToDelete}
+            onCancel={() => setEmployeeToDelete(null)}
+            onConfirm={async () => {
+              const previousState = previousEmployeeRef.current
+              setEmployeesByTeam((prev) => {
+                const teamId = employeeToDelete.teamId
+                if (!employeeToDelete || !teamId) return prev
+
+                const newMap = new Map(prev)
+                const teamEmployees = newMap.get(teamId) ?? []
+                newMap.set(
+                  teamId,
+                  teamEmployees.filter((e) => e.id !== employeeToDelete.id)
+                )
+                return newMap
+              })
+              try {
+                await fetch('/api/employees/delete', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ employeeId: employeeToDelete.id }),
+                })
+
+                toast.success(`Employee has been removed`, {
+                  description: `Click undo to revert this action`,
+                  action: {
+                    label: 'Undo',
+                    onClick: () => setEmployeesByTeam(previousState),
+                  },
+                })
+
+                setEmployeeToDelete(null)
+              } catch (error) {
+                console.error('Failed to persist:', error)
+                setEmployeesByTeam(previousState)
+                toast.error('Failed to save changes')
+              }
+            }}
+          />
+        )}
+
+        <TrashZone visible={dragging} />
+      </DragDropProvider>
     </>
   )
 }

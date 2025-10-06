@@ -6,3 +6,7 @@ export type Team = InferSelectModel<typeof teams>
 export type Role = InferSelectModel<typeof roles>
 export type TeamRoleTarget = InferSelectModel<typeof teamRoleTargets>
 export type EmployeeNote = InferSelectModel<typeof employeeNotes>
+
+export interface EmployeeWithNotes extends Employee {
+  notes: EmployeeNote[]
+}
