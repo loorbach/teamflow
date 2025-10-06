@@ -1,6 +1,8 @@
 import { db } from '@/db/client'
 import { employees } from '@/db/schema'
-import { NextResponse } from 'next/server'
+import { EmployeeNote } from '@/db/types'
+import { eq, sql } from 'drizzle-orm'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 const NewEmployeeSchema = z.object({
@@ -9,37 +11,39 @@ const NewEmployeeSchema = z.object({
   fte: z.coerce.number().min(0).max(1),
   roleId: z.string().min(1),
   teamId: z.string().min(1),
-  sortIndex: z.number().int().min(0),
+  notes: z.array(z.custom<EmployeeNote>()).length(0),
 })
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    console.log('received from frontend', body)
     const parsed = NewEmployeeSchema.parse(body)
 
-    const newEmployee = {
-      id: crypto.randomUUID(),
-      ...parsed,
-    }
+    const id = crypto.randomUUID()
+
+    const teamCountResult = await db
+      .select({ count: sql`count(*)`.mapWith(Number) })
+      .from(employees)
+      .where(eq(employees.teamId, parsed.teamId))
+
+    const sortIndex = teamCountResult[0]?.count ?? 0
+    console.log(sortIndex)
+
+    const newEmployee = { id, ...parsed, sortIndex }
 
     await db.insert(employees).values(newEmployee)
 
     return NextResponse.json(newEmployee, { status: 201 })
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      const fieldErrors = err.issues.reduce(
-        (acc, issue) => {
-          const field = issue.path[0] as string
-          acc[field] = issue.message
-          return acc
-        },
-        {} as Record<string, string>
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.log('zod error')
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.issues },
+        { status: 400 }
       )
-
-      return NextResponse.json({ error: fieldErrors }, { status: 400 })
     }
-
-    console.error(err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('POST error', error)
+    return NextResponse.json({ error: 'Failed to update employees' }, { status: 500 })
   }
 }

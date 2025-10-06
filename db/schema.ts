@@ -1,6 +1,7 @@
 import type { AdapterAccountType } from '@auth/core/adapters'
 import {
   boolean,
+  index,
   integer,
   numeric,
   pgTable,
@@ -111,19 +112,27 @@ export const teams = pgTable('teams', {
   name: text('name').notNull(),
 })
 
-export const employees = pgTable('employees', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  fte: real('fte').notNull(),
-  roleId: text('role_id')
-    .notNull()
-    .references(() => roles.id),
-  teamId: text('team_id').references(() => teams.id),
-  sortIndex: integer('sort_index').notNull(),
-})
+export const employees = pgTable(
+  'employees',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    firstName: text('first_name').notNull(),
+    lastName: text('last_name').notNull(),
+    fte: real('fte').notNull(),
+    roleId: text('role_id')
+      .notNull()
+      .references(() => roles.id),
+    teamId: text('team_id').references(() => teams.id),
+    sortIndex: integer('sort_index').notNull(),
+  },
+  (table) => {
+    return {
+      teamIdIndex: index('idx_employees_team_id').on(table.teamId),
+    }
+  }
+)
 
 export const teamRoleTargets = pgTable(
   'team_role_targets',

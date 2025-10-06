@@ -1,70 +1,33 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
-import {
-  closestCorners,
-  DndContext,
-  DragCancelEvent,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  KeyboardSensor,
-  PointerSensor,
-  UniqueIdentifier,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import { restrictToWindowEdges } from '@dnd-kit/modifiers'
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { Employee, EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { UniqueIdentifier } from '@dnd-kit/abstract'
+import { RestrictToWindow } from '@dnd-kit/dom/modifiers'
+import { DragDropProvider } from '@dnd-kit/react'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
 import DnDContainer from './dnd-container'
-import EmployeeCardOverlay from './employee-card-overlay'
 import Header from './header'
 import TrashZone from './trash-zone'
 
 type Props = {
-  initialEmployees: Record<string, Employee[]>
+  initialEmployees: Record<string, EmployeeWithNotes[]>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
-  employeeNotes: EmployeeNote[]
 }
 
-function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }: Props) {
-  const [employeesByTeam, setEmployeesByTeam] = useState<Map<string, Employee[]>>(
-    () => new Map(Object.entries(initialEmployees))
-  )
-  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null)
-  const previousEmployeeRef = useRef<Map<string, Employee[]>>(employeesByTeam)
+function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
+  const [employeesByTeam, setEmployeesByTeam] = useState<
+    Map<UniqueIdentifier, EmployeeWithNotes[]>
+  >(() => new Map(Object.entries(initialEmployees)))
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeWithNotes | null>(null)
+  const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam)
   const [dragging, setDragging] = useState(false)
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
-  const [openTeamMap, setOpenTeamMap] = useState<Record<string, boolean>>({})
 
-  const allTeamsOpen = teams.every((team) => openTeamMap[team.id])
+  console.log(employeesByTeam)
 
-  const toggleOneTeam = (teamId: string) => {
-    setOpenTeamMap((prev) => ({
-      ...prev,
-      [teamId]: !prev[teamId],
-    }))
-  }
-
-  const toggleAllTeams = () => {
-    const allOpen = teams.every((team) => openTeamMap[team.id])
-    const newMap = Object.fromEntries(teams.map((team) => [team.id, !allOpen]))
-
-    setOpenTeamMap(newMap)
-  }
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  function getEmployeeById(id: UniqueIdentifier | null): Employee | undefined {
+  function getEmployeeById(id: string | null): EmployeeWithNotes | undefined {
     if (!id) return undefined
     for (const employees of employeesByTeam.values()) {
       const employee = employees.find((e) => e.id === id)
@@ -72,7 +35,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
     }
   }
 
-  function findContainerId(itemId: UniqueIdentifier): UniqueIdentifier | undefined {
+  function findContainerId(itemId: number | string): UniqueIdentifier | undefined {
     if (teams.some((team) => team.id === itemId)) return itemId
 
     for (const [teamId, employees] of employeesByTeam.entries()) {
@@ -108,74 +71,115 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
     }
   }
 
-  function handleDragStart(event: DragStartEvent) {
-    console.log('drag event fired', event.active.id)
-    console.log(employeesByTeam)
+  function handleDragStart() {
     previousEmployeeRef.current = new Map(employeesByTeam)
-    setActiveId(event.active.id)
     setDragging(true)
   }
 
-  function handleDragEnd(event: DragEndEvent) {
-    setDragging(false)
-    const { active, over } = event
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleDragOver(event) {
+    event.preventDefault()
+    // const { source, target } = event.operation
+    // if (!target) return
+    // console.log('source', source.id) // ← always equals target when e.prevD is not used
+    // console.log('target', target.id)
+    // console.log(isSortable(event.operation.target))
+  }
 
-    if (!over) {
-      setActiveId(null)
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleDragEnd(event) {
+    const { source, target } = event.operation
+    const { canceled } = event
+
+    setDragging(false)
+
+    if (canceled) {
+      console.log(`Cancelled dragging ${source.id}`)
+      setDragging(false)
       setEmployeesByTeam(previousEmployeeRef.current)
       return
     }
 
-    if (over.id === 'trash') {
-      const emp = getEmployeeById(active.id)
+    if (!target) {
+      setEmployeesByTeam(previousEmployeeRef.current)
+      return
+    }
+
+    if (target.id === 'trash') {
+      const emp = getEmployeeById(source.id)
       if (emp) setEmployeeToDelete(emp)
-      setActiveId(null)
       return
     }
 
-    const activeTeamId = findContainerId(active.id)
-    const overTeamId = findContainerId(over.id)
+    console.log(`Dropped ${source.id} over ${target.id}`)
 
-    if (!activeTeamId || !overTeamId) {
-      setActiveId(null)
+    const sourceTeamId = findContainerId(source.id)
+    const targetTeamId = findContainerId(target.id)
+    console.log('teamids', sourceTeamId, targetTeamId)
+
+    if (!sourceTeamId || !targetTeamId) {
       return
     }
-
-    let changedEmployees: Employee[] | null = null
 
     setEmployeesByTeam((prevMap) => {
+      let changedEmployees: EmployeeWithNotes[] | null = null
       const map = new Map(prevMap)
 
-      if (activeTeamId === overTeamId && active.id !== over.id) {
-        const teamId = activeTeamId.toString()
+      if (sourceTeamId === targetTeamId && source.id !== target.id) {
+        console.warn('initiating reorder')
+        const teamId = sourceTeamId.toString()
         const oldArray = map.get(teamId)
         if (!oldArray) return map
 
         const newArray = [...oldArray]
-        const oldIndex = newArray.findIndex((e) => e.id === active.id)
-        const newIndex = newArray.findIndex((e) => e.id === over.id)
+        const oldIndex = newArray.findIndex((e) => e.id === source.id)
+        const newIndex = newArray.findIndex((e) => e.id === target.id)
+
         if (oldIndex === -1 || newIndex === -1) return map
 
         const [moved] = newArray.splice(oldIndex, 1)
-        console.log(moved)
         newArray.splice(newIndex, 0, moved)
         newArray.forEach((e, i) => (e.sortIndex = i))
         changedEmployees = newArray
 
         map.set(teamId, newArray)
-      } else if (activeTeamId !== overTeamId) {
-        const sourceId = activeTeamId.toString()
-        const targetId = overTeamId.toString()
+      } else if (sourceTeamId !== targetTeamId) {
+        console.warn('initializing cross team move')
+
+        const sourceId = sourceTeamId.toString()
+        const targetId = targetTeamId.toString()
+
         const sourceArray = map.get(sourceId)
         const targetArray = map.get(targetId)
         if (!sourceArray || !targetArray) return map
 
         const newSource = [...sourceArray]
         const newTarget = [...targetArray]
+        const sourceIndex = newSource.findIndex((e) => e.id === source.id)
+        if (sourceIndex === -1) return map
 
-        const sourceIndex = newSource.findIndex((e) => e.id === active.id)
-        const targetIndex = newTarget.findIndex((e) => e.id === over.id)
-        if (sourceIndex === -1 || targetIndex === -1) return map
+        const isTargetTeam = teams.some((team) => team.id === target.id)
+        let targetIndex = 0
+
+        if (isTargetTeam) {
+          // Case 1 & 2: Dropping on a team
+          if (targetArray.length === 0) {
+            // Case 2: Empty team - append to end (index 0)
+            console.log('dropping on empty team')
+            targetIndex = 0
+          } else {
+            // Case 1: Team with employees - append to end
+            console.log('dropping on team with employees')
+            targetIndex = newTarget.length
+          }
+        } else {
+          // Target is an employee
+          targetIndex = newTarget.findIndex((e) => e.id === target.id)
+          if (targetIndex === -1) return map
+        }
+
+        console.log(sourceIndex)
+        console.log(targetIndex)
 
         const [moved] = newSource.splice(sourceIndex, 1)
         moved.teamId = targetId
@@ -189,42 +193,43 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
         map.set(targetId, newTarget)
       }
 
+      if (changedEmployees) {
+        console.log('calling persist')
+        persistEmployees(changedEmployees)
+      }
       return map
     })
-
-    setActiveId(null)
-    if (changedEmployees) persistEmployees(changedEmployees)
-  }
-
-  function handleDragCancel(event: DragCancelEvent) {
-    setActiveId(null)
-    setDragging(false)
-    setEmployeesByTeam(previousEmployeeRef.current) //revert any preview changes
-    void event
   }
 
   return (
     <>
       <Header
-        onEmployeeAdded={() => {}}
-        toggleAllTeams={toggleAllTeams}
-        allTeamsOpen={allTeamsOpen}
+        onEmployeeAdded={(newEmployee: EmployeeWithNotes) => {
+          setEmployeesByTeam((prevMap) => {
+            const newMap = new Map(prevMap)
+            const teamId = newEmployee.teamId
+            if (!teamId) return prevMap
+
+            const teamEmployees = prevMap.get(teamId) ?? []
+
+            const updated = [...teamEmployees, newEmployee]
+
+            newMap.set(teamId, updated)
+
+            return newMap
+          })
+        }}
       />
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
+      <DragDropProvider
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-        // measuring={{ droppable: { strategy: MeasuringStrategy.WhileDragging, frequency: 200 } }}
+        modifiers={[RestrictToWindow]}
       >
         <DnDContainer
           teams={teams}
           employeesByTeam={employeesByTeam}
           teamRoleTargets={teamRoleTargets}
-          employeeNotes={employeeNotes}
-          toggleOneTeam={toggleOneTeam}
-          openTeamMap={openTeamMap}
         />
         {employeeToDelete && (
           <ConfirmDeleteDialog
@@ -269,17 +274,8 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
           />
         )}
 
-        <DragOverlay
-          dropAnimation={{
-            duration: 150,
-            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-          }}
-          modifiers={[restrictToWindowEdges]}
-        >
-          {activeId ? <EmployeeCardOverlay employee={getEmployeeById(activeId)!} /> : null}
-        </DragOverlay>
         <TrashZone visible={dragging} />
-      </DndContext>
+      </DragDropProvider>
     </>
   )
 }
