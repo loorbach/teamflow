@@ -1,8 +1,9 @@
+import { EmployeeWithNotes } from '@/db/types'
 import HeaderControls from './header-controls'
 import UserMenu from './user-menu'
 
 type Props = {
-  onEmployeeAdded: (employee) => void
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
 }
 
 function Header({ onEmployeeAdded }: Props) {

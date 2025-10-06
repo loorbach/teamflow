@@ -1,5 +1,6 @@
 import { db } from '@/db/client'
 import { employees } from '@/db/schema'
+import { EmployeeNote } from '@/db/types'
 import { eq, sql } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -10,6 +11,7 @@ const NewEmployeeSchema = z.object({
   fte: z.coerce.number().min(0).max(1),
   roleId: z.string().min(1),
   teamId: z.string().min(1),
+  notes: z.array(z.custom<EmployeeNote>()).length(0),
 })
 
 export async function POST(req: NextRequest) {

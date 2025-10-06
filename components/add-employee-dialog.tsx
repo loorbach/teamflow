@@ -9,11 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { EmployeeWithNotes } from '@/db/types'
 import { UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import AddEmployeeForm from './add-employee-form'
 
-export function AddEmployeeDialog({ onEmployeeAdded }: { onEmployeeAdded: (employee) => void }) {
+export function AddEmployeeDialog({
+  onEmployeeAdded,
+}: {
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
+}) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
   return (

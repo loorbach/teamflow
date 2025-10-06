@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
 import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
 import { motion } from 'framer-motion'
@@ -12,21 +12,11 @@ import { Card } from './ui/card'
 
 type Props = {
   team: Team
-  employees: Employee[]
+  employees: EmployeeWithNotes[]
   teamRoleTargets: TeamRoleTarget[]
-  employeeNotes: EmployeeNote[]
-  onNoteAdded: (note: EmployeeNote) => void
-  onNoteDeleted: (noteId: string) => void
 }
 
-function TeamColumn({
-  team,
-  employees,
-  teamRoleTargets,
-  employeeNotes,
-  onNoteAdded,
-  onNoteDeleted,
-}: Props) {
+function TeamColumn({ team, employees, teamRoleTargets }: Props) {
   const [open, setOpen] = useState<boolean>(false)
   const { isDropTarget, ref } = useDroppable({
     id: team.id,
@@ -99,15 +89,7 @@ function TeamColumn({
 
       <div ref={ref} style={style} className="flex flex-col space-y-1.5 border min-h-[43.5px]">
         {employees.map((emp, idx) => (
-          <EmployeeCard
-            key={emp.id}
-            employee={emp}
-            teamId={team.id}
-            index={idx}
-            employeeNotes={employeeNotes}
-            onNoteAdded={onNoteAdded}
-            onNoteDeleted={onNoteDeleted}
-          />
+          <EmployeeCard key={emp.id} employee={emp} teamId={team.id} index={idx} />
         ))}
       </div>
     </Card>

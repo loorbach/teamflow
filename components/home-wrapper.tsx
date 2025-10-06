@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeNote, Team, TeamRoleTarget } from '@/db/types'
+import { Employee, EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { RestrictToWindow } from '@dnd-kit/dom/modifiers'
 import { DragDropProvider } from '@dnd-kit/react'
@@ -12,23 +12,22 @@ import Header from './header'
 import TrashZone from './trash-zone'
 
 type Props = {
-  initialEmployees: Record<string, Employee[]>
+  initialEmployees: Record<string, EmployeeWithNotes[]>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
-  employeeNotes: EmployeeNote[]
 }
 
-function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }: Props) {
-  const [employeesByTeam, setEmployeesByTeam] = useState<Map<UniqueIdentifier, Employee[]>>(
-    () => new Map(Object.entries(initialEmployees))
-  )
-  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null)
-  const previousEmployeeRef = useRef<Map<UniqueIdentifier, Employee[]>>(employeesByTeam)
+function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
+  const [employeesByTeam, setEmployeesByTeam] = useState<
+    Map<UniqueIdentifier, EmployeeWithNotes[]>
+  >(() => new Map(Object.entries(initialEmployees)))
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeWithNotes | null>(null)
+  const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam)
   const [dragging, setDragging] = useState(false)
 
   console.log(employeesByTeam)
 
-  function getEmployeeById(id: string | null): Employee | undefined {
+  function getEmployeeById(id: string | null): EmployeeWithNotes | undefined {
     if (!id) return undefined
     for (const employees of employeesByTeam.values()) {
       const employee = employees.find((e) => e.id === id)
@@ -205,7 +204,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
   return (
     <>
       <Header
-        onEmployeeAdded={(newEmployee: Employee) => {
+        onEmployeeAdded={(newEmployee: EmployeeWithNotes) => {
           setEmployeesByTeam((prevMap) => {
             const newMap = new Map(prevMap)
             const teamId = newEmployee.teamId
@@ -231,7 +230,6 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets, employeeNotes }
           teams={teams}
           employeesByTeam={employeesByTeam}
           teamRoleTargets={teamRoleTargets}
-          employeeNotes={employeeNotes}
         />
         {employeeToDelete && (
           <ConfirmDeleteDialog

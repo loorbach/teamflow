@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Employee } from '@/db/types'
+import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Slider } from './ui/slider'
@@ -32,13 +32,14 @@ type SendEmployee = {
   fte: number
   roleId: string
   teamId: string
+  notes: EmployeeNote[]
 }
 
 function AddEmployeeForm({
   onEmployeeAdded,
   onClose,
 }: {
-  onEmployeeAdded: (employee: SendEmployee) => void
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
   onClose: () => void
 }) {
   const [fte, setFte] = useState<number>(1.0)
@@ -50,12 +51,13 @@ function AddEmployeeForm({
       onSubmit={async (e) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        const newEmployee = {
+        const newEmployee: SendEmployee = {
           firstName: formData.get('firstName') as string,
           lastName: formData.get('lastName') as string,
           fte: fte,
           roleId: roleId,
           teamId: teamId,
+          notes: [],
         }
 
         try {
@@ -66,7 +68,7 @@ function AddEmployeeForm({
           })
 
           if (res.ok) {
-            const resEmployee: Employee = await res.json()
+            const resEmployee: EmployeeWithNotes = await res.json()
             if (!resEmployee || !resEmployee.teamId) return
             console.warn('resemp!!', resEmployee)
             const validEmployee = { ...resEmployee, teamId: resEmployee.teamId }

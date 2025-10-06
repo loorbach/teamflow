@@ -1,32 +1,22 @@
 'use client'
 
 import { addNote, deleteNote } from '@/app/actions/notes'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Employee, EmployeeNote } from '@/db/types'
+import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { CirclePlus, GripVertical, Trash } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Textarea } from './ui/textarea'
 
 type Props = {
-  employee: Employee
-  employeeNotes: EmployeeNote[]
-  onNoteAdded: (note: EmployeeNote) => void
-  onNoteDeleted: (noteId: string) => void
+  employee: EmployeeWithNotes
   index: number
   teamId: string
 }
 
-function EmployeeCard({
-  employee,
-  employeeNotes,
-  onNoteAdded,
-  onNoteDeleted,
-  index,
-  teamId,
-}: Props) {
+function EmployeeCard({ employee, index, teamId }: Props) {
   const { ref, isDragging, handleRef } = useSortable({
     id: employee.id,
     index,
@@ -37,11 +27,10 @@ function EmployeeCard({
   const [expanded, setExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [popoverOpen, setPopoverOpen] = useState(false)
-  const notesForEmployee = useMemo(
-    () => employeeNotes.filter((note) => note.employeeId === employee.id),
-    [employeeNotes, employee.id]
-  )
-  const noteCount = notesForEmployee.length
+  const [notes, setNotes] = useState<EmployeeNote[]>(employee.notes)
+  const noteCount = notes.length
+
+  console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   return (
     <div
@@ -56,7 +45,7 @@ function EmployeeCard({
       >
         <div>
           <div className="font-medium leading-tight flex items-center gap-1">
-            {employee.firstName} {employee.lastName} {employee.sortIndex}
+            {employee.firstName} {employee.lastName}
             {noteCount > 0 && (
               <Badge
                 variant="secondary"
@@ -78,8 +67,9 @@ function EmployeeCard({
       </div>
       {expanded && (
         <div className="mt-2 text-xs text-secondary-foreground space-y-1 hover:cursor-default group">
-          {notesForEmployee.length > 0 &&
-            notesForEmployee.map((note) => (
+          {notes &&
+            notes.length > 0 &&
+            notes.map((note) => (
               <div
                 key={note.id}
                 className="flex justify-between items-center overflow-hidden border-t pt-2"
@@ -100,7 +90,7 @@ function EmployeeCard({
                       // const confirmed = confirm('Delete this note?')
                       // if (!confirmed) return
                       await deleteNote(note.id)
-                      onNoteDeleted(note.id)
+                      setNotes((prev) => prev.filter((n) => n.id !== note.id))
                     }}
                   >
                     <Trash />
@@ -120,7 +110,7 @@ function EmployeeCard({
                   className="flex flex-col gap-2"
                   action={async (formData) => {
                     const note = await addNote(formData)
-                    onNoteAdded(note)
+                    setNotes((prev) => [...prev, note])
                     setNoteText('')
                     setPopoverOpen(false)
                   }}

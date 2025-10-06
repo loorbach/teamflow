@@ -1,23 +1,24 @@
 'use client'
-import { FoldVertical } from 'lucide-react'
+import { EmployeeWithNotes } from '@/db/types'
+// import { FoldVertical } from 'lucide-react'
 import { AddEmployeeDialog } from './add-employee-dialog'
-import { Toggle } from './ui/toggle'
+// import { Toggle } from './ui/toggle'
 
 type Props = {
-  onEmployeeAdded: (employee) => void
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
 }
 
 function HeaderControls({ onEmployeeAdded }: Props) {
   return (
     <div className="flex items-center gap-2">
-      <Toggle
+      {/* <Toggle
         // pressed={allTeamsOpen}
         // onPressedChange={toggleAllTeams}
         className="hover:cursor-pointer"
         aria-label="Toggle all teams"
       >
         <FoldVertical className="h-4 w-4" />
-      </Toggle>
+      </Toggle> */}
       <AddEmployeeDialog onEmployeeAdded={onEmployeeAdded} />
     </div>
   )
