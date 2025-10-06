@@ -2,6 +2,7 @@
 
 import { addNote, deleteNote } from '@/app/actions/notes'
 import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
+import { cn } from '@/lib/utils'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { CirclePlus, GripVertical, Trash } from 'lucide-react'
 import { useState } from 'react'
@@ -17,7 +18,7 @@ type Props = {
 }
 
 function EmployeeCard({ employee, index, teamId }: Props) {
-  const { ref, isDragging, handleRef } = useSortable({
+  const { ref, handleRef, isDragging, isDropTarget } = useSortable({
     id: employee.id,
     index,
     type: 'employee',
@@ -30,13 +31,19 @@ function EmployeeCard({ employee, index, teamId }: Props) {
   const [notes, setNotes] = useState<EmployeeNote[]>(employee.notes)
   const noteCount = notes.length
 
-  console.log('rerendering employee:', employee.firstName, employee.lastName)
+  // console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   return (
     <div
       ref={ref}
-      // data-dragging={isDragging}
-      className={`w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-colors duration-200 outline-none text-card-foreground`}
+      className={cn(
+        'w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-all duration-200 ease-out outline-none text-card-foreground',
+        {
+          // 'bg-blue-50 border-[var(--brand)] ring-2 ring-blue-200':
+          //   isDropTarget && isDragging !== isDropTarget,
+          // TODO: implement good drop ux that takes into account reordering and cross team moving
+        }
+      )}
     >
       <div
         className="flex justify-between items-center text-sm gap-2"

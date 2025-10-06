@@ -1,6 +1,7 @@
 'use client'
 
 import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { cn } from '@/lib/utils'
 import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
 import { motion } from 'framer-motion'
@@ -30,12 +31,14 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
   console.log(`TeamColumn rerender: ${team.id}`)
 
-  const style = isDropTarget ? { background: '#00000030' } : undefined
-
   return (
-    <Card className="border rounded p-4 min-w-64 gap-0.75">
+    <Card
+      className={cn('border rounded p-4 min-w-64 gap-0.75 transition-all duration-200 ease-out', {
+        'border-[var(--brand)] scale-105': isDropTarget,
+      })}
+    >
       <div className="flex justify-between items-center px-1 text-sm mb-2">
-        <h2 className="tracking-tight text-foreground">{team.id}</h2>
+        <h2 className="tracking-tight text-foreground">{team.name}</h2>
         <span className="inline-flex items-center font-mono tracking-tighter text-card-foreground">
           {currentTotalFte.toFixed(1)}/{teamTotalFte.toFixed(1)}
           {Math.abs(currentTotalFte - teamTotalFte) > 1 && (
@@ -87,7 +90,7 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
         </motion.ul>
       )}
 
-      <div ref={ref} style={style} className="flex flex-col space-y-1.5 border min-h-[43.5px]">
+      <div ref={ref} className="flex flex-col space-y-1.5 min-h-[43.5px]">
         {employees.map((emp, idx) => (
           <EmployeeCard key={emp.id} employee={emp} teamId={team.id} index={idx} />
         ))}

@@ -81,7 +81,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
     event.preventDefault()
     // const { source, target } = event.operation
     // if (!target) return
-    // console.log('source', source.id) // ← always equals target
+    // console.log('source', source.id) // ← always equals target when e.prevD is not used
     // console.log('target', target.id)
     // console.log(isSortable(event.operation.target))
   }
@@ -122,7 +122,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
     }
 
     setEmployeesByTeam((prevMap) => {
-      let changedEmployees: Employee[] | null = null
+      let changedEmployees: EmployeeWithNotes[] | null = null
       const map = new Map(prevMap)
 
       if (sourceTeamId === targetTeamId && source.id !== target.id) {
