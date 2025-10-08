@@ -162,18 +162,14 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
         let targetIndex = 0
 
         if (isTargetTeam) {
-          // Case 1 & 2: Dropping on a team
           if (targetArray.length === 0) {
-            // Case 2: Empty team - append to end (index 0)
             console.log('dropping on empty team')
             targetIndex = 0
           } else {
-            // Case 1: Team with employees - append to end
             console.log('dropping on team with employees')
             targetIndex = newTarget.length
           }
         } else {
-          // Target is an employee
           targetIndex = newTarget.findIndex((e) => e.id === target.id)
           if (targetIndex === -1) return map
         }
@@ -187,6 +183,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
 
         newSource.forEach((e, i) => (e.sortIndex = i))
         newTarget.forEach((e, i) => (e.sortIndex = i))
+        console.log('newTarget', newTarget, moved)
         changedEmployees = newSource.concat(newTarget)
 
         map.set(sourceId, newSource)
@@ -230,6 +227,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
           teams={teams}
           employeesByTeam={employeesByTeam}
           teamRoleTargets={teamRoleTargets}
+          setEmployeesByTeam={setEmployeesByTeam}
         />
         {employeeToDelete && (
           <ConfirmDeleteDialog

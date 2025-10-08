@@ -2,10 +2,10 @@
 
 import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
 import { cn } from '@/lib/utils'
-import { CollisionPriority } from '@dnd-kit/abstract'
+import { CollisionPriority, UniqueIdentifier } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
 import { ChevronDown, TriangleAlert } from 'lucide-react'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import EmployeeCard from './employee-card'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
@@ -14,9 +14,23 @@ type Props = {
   team: Team
   employees: EmployeeWithNotes[]
   teamRoleTargets: TeamRoleTarget[]
+  setEmployeesByTeam: React.Dispatch<
+    React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
+  >
 }
 
-function TeamColumn({ team, employees, teamRoleTargets }: Props) {
+const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
+  let equal = true
+
+  if (prev.employee !== next.employee) {
+    console.log('RERENDER: employee reference', prev.employee, next.employee)
+    equal = false
+  }
+
+  return equal
+})
+
+function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Props) {
   const [open, setOpen] = useState<boolean>(false)
   const { isDropTarget, ref } = useDroppable({
     id: team.id,
@@ -89,7 +103,13 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
 
       <div ref={ref} className="flex flex-col space-y-1.5 min-h-[43.5px]">
         {employees.map((emp, idx) => (
-          <EmployeeCard key={emp.id} employee={emp} teamId={team.id} index={idx} />
+          <MemoizedEmployeeCard
+            key={emp.id}
+            employee={emp}
+            teamId={team.id}
+            index={idx}
+            setEmployeesByTeam={setEmployeesByTeam}
+          />
         ))}
       </div>
     </Card>
