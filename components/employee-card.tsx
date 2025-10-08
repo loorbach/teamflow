@@ -22,13 +22,14 @@ type Props = {
 }
 
 function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
-  const { ref, handleRef, isDragging, isDropTarget } = useSortable({
+  const { ref, handleRef } = useSortable({
     id: employee.id,
     index,
     type: 'employee',
     accept: 'employee',
     group: teamId,
   })
+  // isDragging and isDropTarget will cause employeeCard rerendering of sortables in question
   const [expanded, setExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [popoverOpen, setPopoverOpen] = useState(false)
