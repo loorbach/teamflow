@@ -2,11 +2,10 @@
 
 import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
 import { cn } from '@/lib/utils'
-import { CollisionPriority } from '@dnd-kit/abstract'
+import { CollisionPriority, UniqueIdentifier } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
-import { motion } from 'framer-motion'
-import { ChevronsUpDown, TriangleAlert } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, TriangleAlert } from 'lucide-react'
+import { memo, useState } from 'react'
 import EmployeeCard from './employee-card'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
@@ -15,9 +14,23 @@ type Props = {
   team: Team
   employees: EmployeeWithNotes[]
   teamRoleTargets: TeamRoleTarget[]
+  setEmployeesByTeam: React.Dispatch<
+    React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
+  >
 }
 
-function TeamColumn({ team, employees, teamRoleTargets }: Props) {
+const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
+  let equal = true
+
+  if (prev.employee !== next.employee) {
+    console.log('RERENDER: employee reference', prev.employee, next.employee)
+    equal = false
+  }
+
+  return equal
+})
+
+function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Props) {
   const [open, setOpen] = useState<boolean>(false)
   const { isDropTarget, ref } = useDroppable({
     id: team.id,
@@ -33,9 +46,10 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
 
   return (
     <Card
-      className={cn('border rounded p-4 min-w-64 gap-0.75 transition-all duration-200 ease-out', {
-        'border-[var(--brand)] scale-105': isDropTarget,
-      })}
+      className={cn(
+        'border rounded p-4 min-w-64 gap-0.75 transition-all duration-200 ease-out',
+        isDropTarget && 'border-[var(--brand)] scale-105'
+      )}
     >
       <div className="flex justify-between items-center px-1 text-sm mb-2">
         <h2 className="tracking-tight text-foreground">{team.name}</h2>
@@ -51,16 +65,13 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
           className="size-6"
           onClick={() => setOpen((prev) => !prev)}
         >
-          <ChevronsUpDown />
+          <ChevronDown
+            className={cn('transition-transform duration-200 ease-out', open && 'rotate-180')}
+          />
         </Button>
       </div>
       {open && (
-        <motion.ul
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono"
-        >
+        <ul className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono">
           {teamRoleTargets
             .filter((target) => target.teamId === team.id)
             .map((target) => {
@@ -87,12 +98,18 @@ function TeamColumn({ team, employees, teamRoleTargets }: Props) {
                 </li>
               )
             })}
-        </motion.ul>
+        </ul>
       )}
 
       <div ref={ref} className="flex flex-col space-y-1.5 min-h-[43.5px]">
         {employees.map((emp, idx) => (
-          <EmployeeCard key={emp.id} employee={emp} teamId={team.id} index={idx} />
+          <MemoizedEmployeeCard
+            key={emp.id}
+            employee={emp}
+            teamId={team.id}
+            index={idx}
+            setEmployeesByTeam={setEmployeesByTeam}
+          />
         ))}
       </div>
     </Card>

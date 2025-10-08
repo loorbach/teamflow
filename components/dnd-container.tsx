@@ -9,6 +9,9 @@ type Props = {
   employeesByTeam: Map<UniqueIdentifier, EmployeeWithNotes[]>
   teams: Team[]
   teamRoleTargets: TeamRoleTarget[]
+  setEmployeesByTeam: React.Dispatch<
+    React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
+  >
 }
 
 const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
@@ -32,7 +35,7 @@ const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
   return equal
 })
 
-function DnDContainer({ employeesByTeam, teams, teamRoleTargets }: Props) {
+function DnDContainer({ employeesByTeam, teams, teamRoleTargets, setEmployeesByTeam }: Props) {
   return (
     <div className="flex gap-4 flex-wrap px-4 py-2 items-start">
       {teams.map((team) => {
@@ -43,6 +46,7 @@ function DnDContainer({ employeesByTeam, teams, teamRoleTargets }: Props) {
             team={team}
             employees={teamEmployees}
             teamRoleTargets={teamRoleTargets}
+            setEmployeesByTeam={setEmployeesByTeam}
           />
         )
       })}

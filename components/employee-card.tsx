@@ -1,8 +1,9 @@
 'use client'
 
 import { addNote, deleteNote } from '@/app/actions/notes'
-import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
+import { EmployeeWithNotes } from '@/db/types'
 import { cn } from '@/lib/utils'
+import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { CirclePlus, GripVertical, Trash } from 'lucide-react'
 import { useState } from 'react'
@@ -15,23 +16,26 @@ type Props = {
   employee: EmployeeWithNotes
   index: number
   teamId: string
+  setEmployeesByTeam: React.Dispatch<
+    React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
+  >
 }
 
-function EmployeeCard({ employee, index, teamId }: Props) {
-  const { ref, handleRef, isDragging, isDropTarget } = useSortable({
+function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
+  const { ref, handleRef } = useSortable({
     id: employee.id,
     index,
     type: 'employee',
     accept: 'employee',
     group: teamId,
   })
+  // isDragging and isDropTarget will cause employeeCard rerendering of sortables in question
   const [expanded, setExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [popoverOpen, setPopoverOpen] = useState(false)
-  const [notes, setNotes] = useState<EmployeeNote[]>(employee.notes)
-  const noteCount = notes.length
+  const noteCount = employee.notes.length
 
-  // console.log('rerendering employee:', employee.firstName, employee.lastName)
+  console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   return (
     <div
@@ -74,9 +78,9 @@ function EmployeeCard({ employee, index, teamId }: Props) {
       </div>
       {expanded && (
         <div className="mt-2 text-xs text-secondary-foreground space-y-1 hover:cursor-default group">
-          {notes &&
-            notes.length > 0 &&
-            notes.map((note) => (
+          {employee.notes &&
+            employee.notes.length > 0 &&
+            employee.notes.map((note) => (
               <div
                 key={note.id}
                 className="flex justify-between items-center overflow-hidden border-t pt-2"
@@ -97,7 +101,22 @@ function EmployeeCard({ employee, index, teamId }: Props) {
                       // const confirmed = confirm('Delete this note?')
                       // if (!confirmed) return
                       await deleteNote(note.id)
-                      setNotes((prev) => prev.filter((n) => n.id !== note.id))
+                      setEmployeesByTeam((prevMap) => {
+                        const newMap = new Map(prevMap)
+                        const teamId = employee.teamId?.toString()
+                        if (!teamId) return prevMap
+                        const team = prevMap.get(teamId)
+                        if (!team) return prevMap
+                        const newTeam = team.map((emp) => {
+                          if (emp.id === employee.id) {
+                            const newNotes = emp.notes.filter((n) => note.id !== n.id)
+                            return { ...emp, notes: newNotes }
+                          }
+                          return emp
+                        })
+                        newMap.set(teamId, newTeam)
+                        return newMap
+                      })
                     }}
                   >
                     <Trash />
@@ -117,7 +136,18 @@ function EmployeeCard({ employee, index, teamId }: Props) {
                   className="flex flex-col gap-2"
                   action={async (formData) => {
                     const note = await addNote(formData)
-                    setNotes((prev) => [...prev, note])
+                    setEmployeesByTeam((prevMap) => {
+                      const newMap = new Map(prevMap)
+                      const teamId = employee.teamId?.toString()
+                      if (!teamId) return prevMap
+                      const team = prevMap.get(teamId)
+                      if (!team) return prevMap
+                      const newTeam = team.map((emp) =>
+                        emp.id === employee.id ? { ...emp, notes: [...emp.notes, note] } : emp
+                      )
+                      newMap.set(teamId, newTeam)
+                      return newMap
+                    })
                     setNoteText('')
                     setPopoverOpen(false)
                   }}
