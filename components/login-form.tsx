@@ -1,9 +1,9 @@
-import { signIn } from '@/auth'
-import { Button } from '@/components/ui/button'
+import loginAction from '@/app/actions/login'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import LoginButton from './login-button'
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -14,17 +14,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
           <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            action={async (formData) => {
-              'use server'
-              const formEntries = Object.fromEntries(formData.entries())
-
-              await signIn('credentials', {
-                ...formEntries,
-                redirectTo: '/',
-              })
-            }}
-          >
+          <form action={loginAction}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -33,19 +23,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
+                  {/* <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </a> */}
                 </div>
                 <Input id="password" name="password" type="password" required />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
+                <LoginButton />
               </div>
             </div>
           </form>

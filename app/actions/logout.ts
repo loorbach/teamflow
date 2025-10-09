@@ -2,8 +2,8 @@
 
 import { signOut } from '@/auth'
 
-async function Logout() {
+async function logoutAction() {
   await signOut()
 }
 
-export default Logout
+export default logoutAction
