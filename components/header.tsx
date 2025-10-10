@@ -7,7 +7,7 @@ function Header({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWithN
     <header className="flex justify-between gap-8 items-center px-4 py-2">
       <MainMenu onEmployeeAdded={onEmployeeAdded} />
       <div className="flex items-center gap-2">
-        <h1 className="text-muted-foreground text-sm">teamflow 0.0.1</h1>
+        <h1 className="text-muted-foreground text-sm">teamflow 0.1.0</h1>
         <ModeToggle />
       </div>
     </header>
