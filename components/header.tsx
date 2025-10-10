@@ -1,21 +1,15 @@
 import { EmployeeWithNotes } from '@/db/types'
-import HeaderControls from './header-controls'
-import UserMenu from './user-menu'
+import MainMenu from './main-menu'
+import { ModeToggle } from './mode-toggle'
 
-type Props = {
-  onEmployeeAdded: (employee: EmployeeWithNotes) => void
-}
-
-function Header({ onEmployeeAdded }: Props) {
+function Header({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWithNotes) => void }) {
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b border-border">
-      <div className="flex items-center gap-1">
-        <h1 className="font-semibold text-foreground">teamflow</h1>
+    <header className="flex justify-between gap-8 items-center px-4 py-2">
+      <MainMenu onEmployeeAdded={onEmployeeAdded} />
+      <div className="flex items-center gap-2">
+        <h1 className="text-muted-foreground text-sm">teamflow 0.0.1</h1>
+        <ModeToggle />
       </div>
-
-      <HeaderControls onEmployeeAdded={onEmployeeAdded} />
-
-      <UserMenu />
     </header>
   )
 }

@@ -4,6 +4,7 @@ import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
 import { cn } from '@/lib/utils'
 import { CollisionPriority, UniqueIdentifier } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, TriangleAlert } from 'lucide-react'
 import { memo, useState } from 'react'
 import EmployeeCard from './employee-card'
@@ -70,36 +71,43 @@ function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Pr
           />
         </Button>
       </div>
-      {open && (
-        <ul className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono">
-          {teamRoleTargets
-            .filter((target) => target.teamId === team.id)
-            .map((target) => {
-              const employeesInRole = employees.filter((e) => e.roleId === target.roleId)
-              const currentFte = employeesInRole.reduce((sum, e) => sum + e.fte, 0)
-              const delta = Math.abs(currentFte - parseFloat(target.targetFte))
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            initial={{ y: -5, opacity: 0.5 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.1, ease: 'easeOut' }}
+            className="mb-2 px-1 space-y-0.5 text-xs text-secondary-foreground font-mono"
+          >
+            {teamRoleTargets
+              .filter((target) => target.teamId === team.id)
+              .map((target) => {
+                const employeesInRole = employees.filter((e) => e.roleId === target.roleId)
+                const currentFte = employeesInRole.reduce((sum, e) => sum + e.fte, 0)
+                const delta = Math.abs(currentFte - parseFloat(target.targetFte))
 
-              let color = 'text-destructive'
-              if (delta <= 0.1) {
-                color = 'text-[var(--success)]'
-              } else if (delta <= 0.5) {
-                color = 'text-[var(--warning)]'
-              }
+                let color = 'text-destructive'
+                if (delta <= 0.1) {
+                  color = 'text-[var(--success)]'
+                } else if (delta <= 0.5) {
+                  color = 'text-[var(--warning)]'
+                }
 
-              return (
-                <li
-                  key={`${target.teamId}-${target.roleId}`}
-                  className="flex justify-between tracking-tight"
-                >
-                  <span>{target.roleId}</span>
-                  <span className={color}>
-                    {currentFte.toFixed(1)} / {parseFloat(target.targetFte).toFixed(1)}
-                  </span>
-                </li>
-              )
-            })}
-        </ul>
-      )}
+                return (
+                  <li
+                    key={`${target.teamId}-${target.roleId}`}
+                    className="flex justify-between tracking-tight"
+                  >
+                    <span>{target.roleId}</span>
+                    <span className={color}>
+                      {currentFte.toFixed(1)} / {parseFloat(target.targetFte).toFixed(1)}
+                    </span>
+                  </li>
+                )
+              })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
 
       <div ref={ref} className="flex flex-col space-y-1.5 min-h-[43.5px]">
         {employees.map((emp, idx) => (
