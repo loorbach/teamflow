@@ -5,7 +5,7 @@ import { EmployeeWithNotes } from '@/db/types'
 import { cn } from '@/lib/utils'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
-import { CirclePlus, GripVertical, Trash } from 'lucide-react'
+import { GripVertical, MessageCircle, Trash } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -35,7 +35,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const noteCount = employee.notes.length
 
-  console.log('rerendering employee:', employee.firstName, employee.lastName)
+  // console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   return (
     <div
@@ -124,11 +124,11 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 </div>
               </div>
             ))}
-          <div className="border-t mt-2">
+          <div className="border-t mt-2 flex gap-2 items-center pt-1">
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button size="sm" variant="outline" className="my-1">
-                  <CirclePlus />
+                <Button size="icon" variant="outline" className="my-1">
+                  <MessageCircle />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="">
@@ -183,6 +183,9 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 </form>
               </PopoverContent>
             </Popover>
+            {/* <Button variant="outline" size="icon">
+              <Trash className="text-destructive" />
+            </Button> */}
           </div>
         </div>
       )}

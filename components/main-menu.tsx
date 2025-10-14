@@ -24,7 +24,7 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="sm" variant="outline" className="">
-            Show Menu
+            Menu
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-46" align="start">
