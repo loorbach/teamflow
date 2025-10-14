@@ -74,6 +74,7 @@ function AddEmployeeForm({
             const validEmployee = { ...resEmployee, teamId: resEmployee.teamId }
             onEmployeeAdded(validEmployee)
             onClose()
+            toast.success('Employee added succesfully') //improve later
           }
         } catch (error) {
           console.error('Failed to persist:', error)

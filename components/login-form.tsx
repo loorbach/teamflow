@@ -8,6 +8,7 @@ import LoginButton from './login-button'
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
+      <h1 className="text-foreground font-semibold text-center">Welcome to Teamflow</h1>
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>

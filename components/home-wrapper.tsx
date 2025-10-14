@@ -25,7 +25,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
   const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam)
   const [dragging, setDragging] = useState(false)
 
-  console.log(employeesByTeam)
+  console.log('empbt val', employeesByTeam.values())
 
   function getEmployeeById(id: string | null): EmployeeWithNotes | undefined {
     if (!id) return undefined
