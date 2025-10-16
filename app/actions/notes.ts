@@ -1,9 +1,10 @@
 'use server'
 
-import { auth } from '@/auth'
 import { db } from '@/db/client'
 import { employeeNotes } from '@/db/schema'
+import { auth } from '@/lib/auth'
 import { eq } from 'drizzle-orm'
+import { headers } from 'next/headers'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -12,7 +13,7 @@ const schema = z.object({
 })
 
 export async function addNote(formData: FormData) {
-  const session = await auth()
+  const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user?.id) {
     throw new Error('Not authenticated')
   }
@@ -45,7 +46,7 @@ const deleteSchema = z.object({
 })
 
 export async function deleteNote(noteId: string) {
-  const session = await auth()
+  const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) throw new Error('Not authenticated')
 
   const parsed = deleteSchema.safeParse({
