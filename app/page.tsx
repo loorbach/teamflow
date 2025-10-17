@@ -1,15 +1,18 @@
-import { auth } from '@/auth'
 import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
 import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
 import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
+import { auth } from '@/lib/auth'
 import { asc, eq } from 'drizzle-orm'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 async function Home() {
-  const session = await auth()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session?.user) redirect('/login')
+  if (!session) {
+    redirect('/login')
+  }
 
   const teamList = await db.select().from(teams)
   const employeesList = await db.select().from(employees).orderBy(asc(employees.sortIndex))

@@ -1,6 +1,6 @@
 'use client'
 
-import logoutAction from '@/app/actions/logout'
+import signOutAction from '@/app/actions/signOut'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -44,8 +44,12 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logoutAction}>
-            Log out
+          <DropdownMenuItem>
+            <form className="w-full" action={signOutAction}>
+              <button className="w-full text-left" type="submit">
+                Sign Out
+              </button>
+            </form>
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
