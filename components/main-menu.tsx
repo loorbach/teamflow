@@ -1,6 +1,6 @@
 'use client'
 
-import logoutAction from '@/app/actions/signOut'
+import signOutAction from '@/app/actions/signOut'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -45,11 +45,8 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <form className="w-full" action={logoutAction}>
-              <button
-                className="w-full text-left sm:hover:text-destructive transform-colors duration-200 ease-out"
-                type="submit"
-              >
+            <form className="w-full" action={signOutAction}>
+              <button className="w-full text-left" type="submit">
                 Sign Out
               </button>
             </form>

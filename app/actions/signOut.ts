@@ -1,19 +1,22 @@
 'use server'
 
 import { auth } from '@/lib/auth'
+import { APIError } from 'better-auth'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-async function logoutAction() {
+async function signOutAction() {
   try {
     await auth.api.signOut({
-      asResponse: true,
       headers: await headers(),
     })
   } catch (error) {
-    console.error(error)
+    if (error instanceof APIError) {
+      console.error(error)
+      throw new Error('Unexpected Sign Out error, contact administrator')
+    }
   }
   redirect('/login')
 }
 
-export default logoutAction
+export default signOutAction
