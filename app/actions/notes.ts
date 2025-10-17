@@ -14,7 +14,7 @@ const schema = z.object({
 
 export async function addNote(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user?.id) {
+  if (!session || !session.user) {
     throw new Error('Not authenticated')
   }
 
@@ -28,17 +28,21 @@ export async function addNote(formData: FormData) {
   }
 
   const { employeeId, note } = parsed.data
+  try {
+    const [newNote] = await db
+      .insert(employeeNotes)
+      .values({
+        employeeId,
+        note,
+        userId: session.user.id,
+      })
+      .returning()
 
-  const [newNote] = await db
-    .insert(employeeNotes)
-    .values({
-      employeeId,
-      note,
-      userId: session.user.id,
-    })
-    .returning()
-
-  return newNote
+    return newNote
+  } catch (error) {
+    console.error('Failed to add note', error)
+    throw new Error('Failed to add note')
+  }
 }
 
 const deleteSchema = z.object({
@@ -47,7 +51,8 @@ const deleteSchema = z.object({
 
 export async function deleteNote(noteId: string) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Not authenticated')
+
+  if (!session || !session.user) throw new Error('Not authenticated')
 
   const parsed = deleteSchema.safeParse({
     noteId,
@@ -57,5 +62,10 @@ export async function deleteNote(noteId: string) {
     throw new Error('Invalid input')
   }
 
-  await db.delete(employeeNotes).where(eq(employeeNotes.id, noteId))
+  try {
+    await db.delete(employeeNotes).where(eq(employeeNotes.id, noteId))
+  } catch (error) {
+    console.error('Failed to delete note', error)
+    throw new Error('Failed to delete note')
+  }
 }

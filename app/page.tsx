@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
 async function Home() {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) {
+  if (!session || !session.user) {
     redirect('/login')
   }
 

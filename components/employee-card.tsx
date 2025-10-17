@@ -98,8 +98,6 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                     type="submit"
                     variant="ghost"
                     onClick={async () => {
-                      // const confirmed = confirm('Delete this note?')
-                      // if (!confirmed) return
                       await deleteNote(note.id)
                       setEmployeesByTeam((prevMap) => {
                         const newMap = new Map(prevMap)
