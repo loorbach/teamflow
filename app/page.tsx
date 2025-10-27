@@ -1,7 +1,7 @@
 import HomeWrapper from '@/components/home-wrapper'
 import { db } from '@/db/client'
 import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema'
-import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
+import { EmployeeNote, EmployeeWithNotes, RoleTargetWithName } from '@/db/types'
 import { auth } from '@/lib/auth'
 import { asc, eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
@@ -15,8 +15,14 @@ async function Home() {
   }
 
   const teamList = await db.select().from(teams)
-  const employeesList = await db.select().from(employees).orderBy(asc(employees.sortIndex))
+  const employeesList = await db
+    .select()
+    .from(employees)
+    .leftJoin(roles, eq(employees.roleId, roles.id))
+    .orderBy(asc(employees.sortIndex))
   const employeeNoteList = await db.select().from(employeeNotes)
+
+  console.log('emp list', employeesList)
 
   const notesByEmployee = new Map<string, EmployeeNote[]>()
   employeeNoteList.forEach((note) => {
@@ -27,15 +33,21 @@ async function Home() {
   })
 
   const employeesByTeam = new Map<string, EmployeeWithNotes[]>()
-  teamList.forEach((team) => employeesByTeam.set(team.id, []))
+  const rolesByTeam = new Map<string, RoleTargetWithName[]>()
+
+  teamList.forEach((team) => {
+    employeesByTeam.set(team.id, [])
+    rolesByTeam.set(team.id, [])
+  })
 
   employeesList.forEach((employee) => {
-    if (!employee || !employee.teamId) return
-    const teamEmployees = employeesByTeam.get(employee.teamId)
+    if (!employee || !employee.employees.teamId || !employee.roles) return
+    const teamEmployees = employeesByTeam.get(employee.employees.teamId)
 
     const employeeWithNotes: EmployeeWithNotes = {
-      ...employee,
-      notes: notesByEmployee.get(employee.id) || [],
+      ...employee.employees,
+      role: employee.roles,
+      notes: notesByEmployee.get(employee.employees.id) || [],
     }
 
     if (teamEmployees) teamEmployees.push(employeeWithNotes)
@@ -43,7 +55,7 @@ async function Home() {
 
   console.log('employees by team', employeesByTeam)
 
-  const roleTargetList = await db
+  const roleTargetList: RoleTargetWithName[] = await db
     .select({
       teamId: teamRoleTargets.teamId,
       roleId: teamRoleTargets.roleId,
@@ -53,11 +65,23 @@ async function Home() {
     .from(teamRoleTargets)
     .innerJoin(roles, eq(teamRoleTargets.roleId, roles.id))
 
+  // console.log('roleTargetList in page.tsx', roleTargetList)
+
+  roleTargetList.forEach((roleTarget) => {
+    if (!roleTarget || !roleTarget.teamId) return
+
+    const teamArray = rolesByTeam.get(roleTarget.teamId)
+    if (!teamArray) return
+    teamArray.push(roleTarget)
+  })
+
+  console.log('rolesbyTeam map', rolesByTeam)
+
   return (
     <HomeWrapper
       teams={teamList}
       initialEmployees={Object.fromEntries(employeesByTeam)}
-      teamRoleTargets={roleTargetList}
+      roleTargets={rolesByTeam}
     />
   )
 }

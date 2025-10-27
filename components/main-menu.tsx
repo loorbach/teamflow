@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmployeeWithNotes } from '@/db/types'
@@ -28,11 +27,11 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-46" align="start">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>Teamflow 0.1.0</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem disabled>
               Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -40,7 +39,7 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
             <DropdownMenuItem disabled>Request feature</DropdownMenuItem>
             <DropdownMenuItem onClick={() => setOpenAddEmployeeDialog(true)}>
               Add Employee
-              <DropdownMenuShortcut>⌘+E</DropdownMenuShortcut>
+              {/* <DropdownMenuShortcut>⌘+E</DropdownMenuShortcut> */}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -50,7 +49,7 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
                 Sign Out
               </button>
             </form>
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+            {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

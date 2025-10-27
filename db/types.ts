@@ -9,4 +9,7 @@ export type EmployeeNote = InferSelectModel<typeof employeeNotes>
 
 export interface EmployeeWithNotes extends Employee {
   notes: EmployeeNote[]
+  role: Role
 }
+
+export type RoleTargetWithName = TeamRoleTarget & { roleName: string }

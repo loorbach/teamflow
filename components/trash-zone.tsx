@@ -23,13 +23,16 @@ export default function TrashZone({ visible }: Props) {
     <div
       ref={ref}
       className={cn(
-        'fixed bottom-4 right-4 h-[100px] w-[200px] flex items-center justify-center rounded-md border-2 border-dashed text-sm transition-transform duration-200',
+        'fixed bottom-4 right-4 h-[100px] w-[200px] flex items-center justify-center rounded-md border-2 border-dashed text-sm transition-transform duration-200 ease-out',
         'bg-destructive/10 text-destructive border-destructive',
         isDropTarget && 'border-red-600/80 dark:border-red-400/80 scale-110'
       )}
     >
       <Trash
-        className={cn('size-8 z-10 transition-transform duration-200', isDropTarget && 'scale-110')}
+        className={cn(
+          'size-8 z-10 transition-transform ease-out duration-150',
+          isDropTarget && 'scale-110'
+        )}
       />
       <span className="sr-only">Trash zone</span>
     </div>
