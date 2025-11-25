@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { Employee, EmployeeWithNotes, RoleTargetWithName, Team } from '@/db/types'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { RestrictToWindow } from '@dnd-kit/dom/modifiers'
 import { DragDropProvider } from '@dnd-kit/react'
@@ -14,10 +14,10 @@ import TrashZone from './trash-zone'
 type Props = {
   initialEmployees: Record<string, EmployeeWithNotes[]>
   teams: Team[]
-  teamRoleTargets: TeamRoleTarget[]
+  roleTargets: Map<string, RoleTargetWithName[]>
 }
 
-function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
+function HomeWrapper({ initialEmployees, teams, roleTargets }: Props) {
   const [employeesByTeam, setEmployeesByTeam] = useState<
     Map<UniqueIdentifier, EmployeeWithNotes[]>
   >(() => new Map(Object.entries(initialEmployees)))
@@ -25,7 +25,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
   const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam)
   const [dragging, setDragging] = useState(false)
 
-  console.log('empbt val', employeesByTeam.values())
+  // console.log('empbt val', employeesByTeam.values())
 
   function getEmployeeById(id: string | null): EmployeeWithNotes | undefined {
     if (!id) return undefined
@@ -226,7 +226,7 @@ function HomeWrapper({ initialEmployees, teams, teamRoleTargets }: Props) {
         <DnDContainer
           teams={teams}
           employeesByTeam={employeesByTeam}
-          teamRoleTargets={teamRoleTargets}
+          roleTargets={roleTargets}
           setEmployeesByTeam={setEmployeesByTeam}
         />
         {employeeToDelete && (

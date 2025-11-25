@@ -2,10 +2,10 @@
 
 import { addNote, deleteNote } from '@/app/actions/notes'
 import { EmployeeWithNotes } from '@/db/types'
-import { cn } from '@/lib/utils'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
-import { GripVertical, MessageCircle, Trash } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { MessageCircleMore, PenLine, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -22,7 +22,7 @@ type Props = {
 }
 
 function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
-  const { ref, handleRef } = useSortable({
+  const { ref } = useSortable({
     id: employee.id,
     index,
     type: 'employee',
@@ -34,159 +34,163 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   const [noteText, setNoteText] = useState('')
   const [popoverOpen, setPopoverOpen] = useState(false)
   const noteCount = employee.notes.length
-
+  // console.log('employee data:', employee)
   // console.log('rerendering employee:', employee.firstName, employee.lastName)
+
+  const handleDeleteNote = async (noteId: string) => {
+    await deleteNote(noteId)
+    setEmployeesByTeam((prevMap) => {
+      const newMap = new Map(prevMap)
+      const teamId = employee.teamId?.toString()
+      if (!teamId) return prevMap
+      const team = prevMap.get(teamId)
+      if (!team) return prevMap
+      const newTeam = team.map((emp) => {
+        if (emp.id === employee.id) {
+          const newNotes = emp.notes.filter((n) => noteId !== n.id)
+          return { ...emp, notes: newNotes }
+        }
+        return emp
+      })
+      newMap.set(teamId, newTeam)
+      return newMap
+    })
+  }
+
+  const handleAddNote = async (formData: FormData) => {
+    const note = await addNote(formData)
+    setEmployeesByTeam((prevMap) => {
+      const newMap = new Map(prevMap)
+      const teamId = employee.teamId?.toString()
+      if (!teamId) return prevMap
+      const team = prevMap.get(teamId)
+      if (!team) return prevMap
+      const newTeam = team.map((emp) =>
+        emp.id === employee.id ? { ...emp, notes: [...emp.notes, note] } : emp
+      )
+      newMap.set(teamId, newTeam)
+      return newMap
+    })
+    setNoteText('')
+    setPopoverOpen(false)
+  }
 
   return (
     <div
       ref={ref}
-      className={cn(
-        'w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow bg-card hover:border-blue-400 transition-all duration-200 ease-out outline-none text-card-foreground',
-        {
-          // 'bg-blue-50 border-[var(--brand)] ring-2 ring-blue-200':
-          //   isDropTarget && isDragging !== isDropTarget,
-          // TODO: implement good drop ux that takes into account reordering and cross team moving
-        }
-      )}
+      className="w-full max-w-[222px] cursor-pointer select-none px-2 py-1 border border-border rounded shadow-xs hover:shadow-sm bg-card transition-shadow duration-150 ease-out text-card-foreground"
     >
       <div
-        className="flex justify-between items-center text-sm gap-2"
+        className="flex justify-between items-start text-sm gap-2 active:scale-99 active:outline-none active:shadow-none duration-150 ease-out transition-all"
         role="button"
-        onClick={() => setExpanded((prev) => !prev)}
+        onClick={(e) => {
+          e.stopPropagation()
+          setExpanded((prev) => !prev)
+        }}
       >
-        <div>
-          <div className="font-medium leading-tight flex items-center gap-1">
+        <div className="flex flex-col overflow-hidden">
+          <div className="font-medium leading-tight truncate">
             {employee.firstName} {employee.lastName}
-            {noteCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="h-5 min-w-5 px-1 font-mono tabular-nums dark:bg-[var(--brand)] bg-blue-500"
-              >
-                {noteCount}
-              </Badge>
-            )}
           </div>
-          <div className="text-xs text-muted-foreground">{employee.roleId}</div>
+          <div className="flex text-xs text-muted-foreground truncate gap-0.75">
+            <span className="truncate">{employee.role.name}</span>
+            <span className="flex-shrink-0">{employee.fte}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-xs font-mono text-right">{employee.fte}</div>
-          <GripVertical
-            ref={handleRef}
-            className="w-6 h-6 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-blue-600 transition-colors duration-200"
-          />
+        <div className="flex items-center gap-3 shrink-0">
+          {noteCount > 0 && (
+            <Badge
+              variant="secondary"
+              className="h-5 min-w-5 px-1 font-mono tabular-nums text-white bg-[var(--brand)]"
+            >
+              <MessageCircleMore />
+              {noteCount}
+            </Badge>
+          )}
         </div>
       </div>
-      {expanded && (
-        <div className="mt-2 text-xs text-secondary-foreground space-y-1 hover:cursor-default group">
-          {employee.notes &&
-            employee.notes.length > 0 &&
-            employee.notes.map((note) => (
-              <div
-                key={note.id}
-                className="flex justify-between items-center overflow-hidden border-t pt-2"
-              >
-                <div className="">
-                  <div className="">{note.note}</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">
-                    {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
-                  </div>
-                </div>
-                <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
-                  <input type="hidden" name="noteId" value={note.id} />
-                  <Button
-                    size="sm"
-                    type="submit"
-                    variant="ghost"
-                    onClick={async () => {
-                      await deleteNote(note.id)
-                      setEmployeesByTeam((prevMap) => {
-                        const newMap = new Map(prevMap)
-                        const teamId = employee.teamId?.toString()
-                        if (!teamId) return prevMap
-                        const team = prevMap.get(teamId)
-                        if (!team) return prevMap
-                        const newTeam = team.map((emp) => {
-                          if (emp.id === employee.id) {
-                            const newNotes = emp.notes.filter((n) => note.id !== n.id)
-                            return { ...emp, notes: newNotes }
-                          }
-                          return emp
-                        })
-                        newMap.set(teamId, newTeam)
-                        return newMap
-                      })
-                    }}
-                  >
-                    <Trash />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          <div className="border-t mt-2 flex gap-2 items-center pt-1">
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button size="icon" variant="outline" className="my-1">
-                  <MessageCircle />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="">
-                <form
-                  className="flex flex-col gap-2"
-                  action={async (formData) => {
-                    const note = await addNote(formData)
-                    setEmployeesByTeam((prevMap) => {
-                      const newMap = new Map(prevMap)
-                      const teamId = employee.teamId?.toString()
-                      if (!teamId) return prevMap
-                      const team = prevMap.get(teamId)
-                      if (!team) return prevMap
-                      const newTeam = team.map((emp) =>
-                        emp.id === employee.id ? { ...emp, notes: [...emp.notes, note] } : emp
-                      )
-                      newMap.set(teamId, newTeam)
-                      return newMap
-                    })
-                    setNoteText('')
-                    setPopoverOpen(false)
-                  }}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ y: -5, opacity: 0.5 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.05, ease: 'easeOut' }}
+            className="mt-2 text-xs hover:cursor-default"
+          >
+            {employee.notes &&
+              employee.notes.length > 0 &&
+              employee.notes.map((note) => (
+                <div
+                  key={note.id}
+                  className="flex justify-between items-start overflow-hidden border-t py-1.5"
                 >
-                  <h4 className="leading-none text-sm">Max 144 characters. Enter to save.</h4>
-                  <input type="hidden" name="employeeId" value={employee.id} />
-                  <Textarea
-                    autoFocus
-                    required
-                    maxLength={144}
-                    className="resize-none text-sm"
-                    name="note"
-                    onChange={(e) => setNoteText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        e.currentTarget.form?.requestSubmit()
-                      }
-                      if (e.key === 'Escape') {
-                        setPopoverOpen(false)
-                      }
-                    }}
-                  />
+                  <div>
+                    <div className="text-secondary-foreground font-medium">{note.note}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
+                    </div>
+                  </div>
                   <Button
-                    variant="outline"
-                    type="submit"
-                    size="sm"
-                    className="hover: cursor-pointer"
-                    disabled={noteText.trim().length === 0}
+                    variant="ghost"
+                    size="icon-sm"
+                    className="hover:text-destructive transition-all duration-150 ease-out text-muted-foreground shrink-0 active:scale-93"
+                    onClick={() => handleDeleteNote(note.id)}
                   >
-                    Save
+                    <Trash2 className="size-3" />
                   </Button>
-                </form>
-              </PopoverContent>
-            </Popover>
-            {/* <Button variant="outline" size="icon">
-              <Trash className="text-destructive" />
-            </Button> */}
-          </div>
-        </div>
-      )}
+                </div>
+              ))}
+            <div className="border-t flex gap-2 items-center py-1">
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="icon-sm"
+                    aria-label="Add Note"
+                    variant="outline"
+                    className="active:scale-93 transition-transform duration-150 ease-out"
+                  >
+                    <PenLine className="size-3" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <form
+                    className="flex flex-col gap-2"
+                    action={(formData) => handleAddNote(formData)}
+                  >
+                    <h4 className="leading-none text-sm">Max 144 characters. Enter to save.</h4>
+                    <input type="hidden" name="employeeId" value={employee.id} />
+                    <Textarea
+                      autoFocus
+                      required
+                      maxLength={144}
+                      className="resize-none text-sm"
+                      name="note"
+                      onChange={(e) => setNoteText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          e.currentTarget.form?.requestSubmit()
+                        }
+                        if (e.key === 'Escape') {
+                          setPopoverOpen(false)
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      type="submit"
+                      size="sm"
+                      disabled={noteText.trim().length === 0}
+                    >
+                      Save
+                    </Button>
+                  </form>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

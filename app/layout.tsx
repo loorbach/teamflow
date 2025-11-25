@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'TeamFlow',
-  description: 'Manage your org!',
+  title: 'Teamflow',
+  description: 'Manage employees',
 }
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 'use client'
 
-import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { EmployeeWithNotes, RoleTargetWithName, Team } from '@/db/types'
 import { cn } from '@/lib/utils'
 import { CollisionPriority, UniqueIdentifier } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
@@ -14,7 +14,7 @@ import { Card } from './ui/card'
 type Props = {
   team: Team
   employees: EmployeeWithNotes[]
-  teamRoleTargets: TeamRoleTarget[]
+  teamRoleTargets: RoleTargetWithName[]
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >
@@ -44,11 +44,12 @@ function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Pr
     .filter((obj) => obj.teamId === team.id)
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
   console.log(`TeamColumn rerender: ${team.id}`)
+  // console.log('teamRoleTargets', teamRoleTargets)
 
   return (
     <Card
       className={cn(
-        'border rounded p-4 min-w-64 gap-0.75 transition-all duration-200 ease-out',
+        'border rounded p-4 min-w-64 gap-0.75 transition-all duration-150 ease-out select-none',
         isDropTarget && 'border-[var(--brand)] scale-105'
       )}
     >
@@ -98,7 +99,7 @@ function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Pr
                     key={`${target.teamId}-${target.roleId}`}
                     className="flex justify-between tracking-tight"
                   >
-                    <span>{target.roleId}</span>
+                    <span>{target.roleName}</span>
                     <span className={color}>
                       {currentFte.toFixed(1)} / {parseFloat(target.targetFte).toFixed(1)}
                     </span>

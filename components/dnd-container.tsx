@@ -1,6 +1,6 @@
 'use client'
 
-import { EmployeeWithNotes, Team, TeamRoleTarget } from '@/db/types'
+import { EmployeeWithNotes, RoleTargetWithName, Team } from '@/db/types'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { memo } from 'react'
 import TeamColumn from './team-column'
@@ -8,7 +8,7 @@ import TeamColumn from './team-column'
 type Props = {
   employeesByTeam: Map<UniqueIdentifier, EmployeeWithNotes[]>
   teams: Team[]
-  teamRoleTargets: TeamRoleTarget[]
+  roleTargets: Map<string, RoleTargetWithName[]>
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >
@@ -35,11 +35,12 @@ const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
   return equal
 })
 
-function DnDContainer({ employeesByTeam, teams, teamRoleTargets, setEmployeesByTeam }: Props) {
+function DnDContainer({ employeesByTeam, teams, roleTargets, setEmployeesByTeam }: Props) {
   return (
     <div className="flex gap-4 flex-wrap px-4 py-2 items-start">
       {teams.map((team) => {
         const teamEmployees = employeesByTeam.get(team.id) ?? []
+        const teamRoleTargets = roleTargets.get(team.id) ?? []
         return (
           <MemoizedTeamColumn
             key={team.id}
