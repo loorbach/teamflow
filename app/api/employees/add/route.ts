@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    console.log('received from frontend', body)
+    // console.log('received from frontend', body)
     const parsed = NewEmployeeSchema.parse(body)
 
     const id = crypto.randomUUID()
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       .where(eq(employees.teamId, parsed.teamId))
 
     const sortIndex = teamCountResult[0]?.count ?? 0
-    console.log(sortIndex)
+    // console.log(sortIndex)
 
     const newEmployee = { id, ...parsed, sortIndex }
 

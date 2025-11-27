@@ -57,7 +57,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   const noteCount = employee.notes.length
   const currentNote = employee.notes.find((n) => n.id === editingNoteId)
   // console.log('employee data:', employee)
-  console.log('rerendering employee:', employee.firstName, employee.lastName)
+  // console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   const handleDeleteNote = async (noteId: string) => {
     await deleteNote(noteId)
@@ -98,7 +98,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   }
 
   const handleEditNote = async (noteId: string, formData: FormData, employeeId: string) => {
-    console.log('made it inside handleEdit note with', noteId, formData.get('note'), employeeId)
+    // console.log('made it inside handleEdit note with', noteId, formData.get('note'), employeeId)
     const updatedNote = await editNote(formData, noteId, employeeId)
 
     setEmployeesByTeam((prevMap) => {

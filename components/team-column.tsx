@@ -24,7 +24,7 @@ const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
   let equal = true
 
   if (prev.employee !== next.employee) {
-    console.log('RERENDER: employee reference', prev.employee, next.employee)
+    // console.log('RERENDER: employee reference', prev.employee, next.employee)
     equal = false
   }
 
@@ -43,7 +43,7 @@ function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Pr
   const teamTotalFte = teamRoleTargets
     .filter((obj) => obj.teamId === team.id)
     .reduce((acc, el) => acc + parseFloat(el.targetFte), 0)
-  console.log(`TeamColumn rerender: ${team.id}`)
+  // console.log(`TeamColumn rerender: ${team.id}`)
   // console.log('teamRoleTargets', teamRoleTargets)
 
   return (

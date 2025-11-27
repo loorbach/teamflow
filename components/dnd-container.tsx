@@ -18,17 +18,17 @@ const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
   let equal = true
 
   if (prev.team.id !== next.team.id) {
-    console.log('RERENDER: team.id changed', prev.team.id, next.team.id)
+    // console.log('RERENDER: team.id changed', prev.team.id, next.team.id)
     equal = false
   }
 
   if (prev.employees !== next.employees) {
-    console.log('RERENDER: employees reference changed for team', next.team.id)
+    // console.log('RERENDER: employees reference changed for team', next.team.id)
     equal = false
   }
 
   if (prev.teamRoleTargets !== next.teamRoleTargets) {
-    console.log('RERENDER: teamRoleTargets reference changed')
+    // console.log('RERENDER: teamRoleTargets reference changed')
     equal = false
   }
 

@@ -47,7 +47,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
   async function persistEmployees(changedEmployees: Employee[] | null) {
     const previousState = previousEmployeeRef.current
     if (!changedEmployees) return
-    console.log('sending these to the backend!', changedEmployees)
+    // console.log('sending these to the backend!', changedEmployees)
 
     try {
       await fetch('/api/employees/bulk-update', {
@@ -95,7 +95,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
     setDragging(false)
 
     if (canceled) {
-      console.log(`Cancelled dragging ${source.id}`)
+      // console.log(`Cancelled dragging ${source.id}`)
       setDragging(false)
       setEmployeesByTeam(previousEmployeeRef.current)
       return
@@ -112,11 +112,11 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
       return
     }
 
-    console.log(`Dropped ${source.id} over ${target.id}`)
+    // console.log(`Dropped ${source.id} over ${target.id}`)
 
     const sourceTeamId = findContainerId(source.id)
     const targetTeamId = findContainerId(target.id)
-    console.log('teamids', sourceTeamId, targetTeamId)
+    // console.log('teamids', sourceTeamId, targetTeamId)
 
     if (!sourceTeamId || !targetTeamId) {
       return
@@ -164,10 +164,10 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
 
         if (isTargetTeam) {
           if (targetArray.length === 0) {
-            console.log('dropping on empty team')
+            // console.log('dropping on empty team')
             targetIndex = 0
           } else {
-            console.log('dropping on team with employees')
+            // console.log('dropping on team with employees')
             targetIndex = newTarget.length
           }
         } else {
@@ -175,8 +175,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
           if (targetIndex === -1) return map
         }
 
-        console.log(sourceIndex)
-        console.log(targetIndex)
+        // console.log(sourceIndex)
+        // console.log(targetIndex)
 
         const [moved] = newSource.splice(sourceIndex, 1)
         moved.teamId = targetId
@@ -184,7 +184,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
 
         newSource.forEach((e, i) => (e.sortIndex = i))
         newTarget.forEach((e, i) => (e.sortIndex = i))
-        console.log('newTarget', newTarget, moved)
+        // console.log('newTarget', newTarget, moved)
         changedEmployees = newSource.concat(newTarget)
 
         map.set(sourceId, newSource)
@@ -192,7 +192,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
       }
 
       if (changedEmployees) {
-        console.log('calling persist')
+        // console.log('calling persist')
         persistEmployees(changedEmployees)
       }
       return map

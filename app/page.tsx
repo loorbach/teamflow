@@ -23,7 +23,7 @@ async function Home() {
   const employeeNoteList = await db.select().from(employeeNotes)
   const roleList = await db.select().from(roles)
 
-  console.log('emp list', employeesList)
+  // console.log('emp list', employeesList)
 
   const notesByEmployee = new Map<string, EmployeeNote[]>()
   employeeNoteList.forEach((note) => {
@@ -54,7 +54,7 @@ async function Home() {
     if (teamEmployees) teamEmployees.push(employeeWithNotes)
   })
 
-  console.log('employees by team', employeesByTeam)
+  // console.log('employees by team', employeesByTeam)
 
   const roleTargetList: RoleTargetWithName[] = await db
     .select({
@@ -76,7 +76,7 @@ async function Home() {
     teamArray.push(roleTarget)
   })
 
-  console.log('roleList', roleList, teamList)
+  // console.log('roleList', roleList, teamList)
 
   return (
     <HomeWrapper
