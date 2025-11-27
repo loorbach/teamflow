@@ -1,6 +1,6 @@
 'use client'
 
-import { Employee, EmployeeWithNotes, RoleTargetWithName, Team } from '@/db/types'
+import { Employee, EmployeeWithNotes, Role, RoleTargetWithName, Team } from '@/db/types'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { RestrictToWindow } from '@dnd-kit/dom/modifiers'
 import { DragDropProvider } from '@dnd-kit/react'
@@ -14,10 +14,11 @@ import TrashZone from './trash-zone'
 type Props = {
   initialEmployees: Record<string, EmployeeWithNotes[]>
   teams: Team[]
+  roles: Role[]
   roleTargets: Map<string, RoleTargetWithName[]>
 }
 
-function HomeWrapper({ initialEmployees, teams, roleTargets }: Props) {
+function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
   const [employeesByTeam, setEmployeesByTeam] = useState<
     Map<UniqueIdentifier, EmployeeWithNotes[]>
   >(() => new Map(Object.entries(initialEmployees)))
@@ -216,6 +217,8 @@ function HomeWrapper({ initialEmployees, teams, roleTargets }: Props) {
             return newMap
           })
         }}
+        roles={roles}
+        teams={teams}
       />
       <DragDropProvider
         onDragStart={handleDragStart}

@@ -1,14 +1,32 @@
 'use client'
 
-import { addNote, deleteNote } from '@/app/actions/notes'
+import { addNote, deleteNote, editNote } from '@/app/actions/notes'
 import { EmployeeWithNotes } from '@/db/types'
 import { UniqueIdentifier } from '@dnd-kit/abstract'
 import { useSortable } from '@dnd-kit/react/sortable'
 import { AnimatePresence, motion } from 'framer-motion'
-import { MessageCircleMore, PenLine, Trash2 } from 'lucide-react'
+import { EllipsisVertical, MessageCircleMore, PenLine } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Textarea } from './ui/textarea'
 
@@ -33,9 +51,13 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [popoverOpen, setPopoverOpen] = useState(false)
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editNoteText, setEditNoteText] = useState('')
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const noteCount = employee.notes.length
+  const currentNote = employee.notes.find((n) => n.id === editingNoteId)
   // console.log('employee data:', employee)
-  // console.log('rerendering employee:', employee.firstName, employee.lastName)
+  console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   const handleDeleteNote = async (noteId: string) => {
     await deleteNote(noteId)
@@ -73,6 +95,32 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
     })
     setNoteText('')
     setPopoverOpen(false)
+  }
+
+  const handleEditNote = async (noteId: string, formData: FormData, employeeId: string) => {
+    console.log('made it inside handleEdit note with', noteId, formData.get('note'), employeeId)
+    const updatedNote = await editNote(formData, noteId, employeeId)
+
+    setEmployeesByTeam((prevMap) => {
+      const newMap = new Map(prevMap)
+      const teamId = employee.teamId?.toString()
+      if (!teamId) return prevMap
+      const team = prevMap.get(teamId)
+      if (!team) return prevMap
+      const newTeam = team.map((emp) => {
+        if (emp.id === employee.id) {
+          const newNotes = emp.notes.map((note) => (note.id === noteId ? updatedNote : note))
+          return { ...emp, notes: newNotes }
+        }
+        return emp
+      })
+
+      newMap.set(teamId, newTeam)
+      return newMap
+    })
+
+    setEditingNoteId(null)
+    setShowEditDialog(false)
   }
 
   return (
@@ -122,7 +170,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
               employee.notes.map((note) => (
                 <div
                   key={note.id}
-                  className="flex justify-between items-start overflow-hidden border-t py-1.5"
+                  className="flex justify-between items-center overflow-hidden border-t py-1.5"
                 >
                   <div>
                     <div className="text-secondary-foreground font-medium">{note.note}</div>
@@ -130,14 +178,30 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                       {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="hover:text-destructive transition-all duration-150 ease-out text-muted-foreground shrink-0 active:scale-93"
-                    onClick={() => handleDeleteNote(note.id)}
-                  >
-                    <Trash2 className="size-3" />
-                  </Button>
+
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" aria-label="Open menu" size="icon-sm">
+                        <EllipsisVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-25" align="end">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setEditingNoteId(note.id)
+                            setEditNoteText(note.note)
+                            setShowEditDialog(true)
+                          }}
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleDeleteNote(note.id)}>
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               ))}
             <div className="border-t flex gap-2 items-center py-1">
@@ -154,10 +218,10 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 </PopoverTrigger>
                 <PopoverContent>
                   <form
-                    className="flex flex-col gap-2"
+                    className="flex flex-col gap-3"
                     action={(formData) => handleAddNote(formData)}
                   >
-                    <h4 className="leading-none text-sm">Max 144 characters. Enter to save.</h4>
+                    <h4 className="leading-none text-sm">Type to add a note.</h4>
                     <input type="hidden" name="employeeId" value={employee.id} />
                     <Textarea
                       autoFocus
@@ -191,6 +255,54 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+      {currentNote && (
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit note</DialogTitle>
+              <DialogDescription>
+                Edit an existing note for {employee.firstName} {employee.lastName}. Click edit when
+                you&apos;re done.
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              action={(formData) => handleEditNote(currentNote.id, formData, employee.id)}
+              className="flex flex-col gap-4"
+            >
+              <Label htmlFor="editNoteInput" className="sr-only"></Label>
+              <Input
+                id="editNoteInput"
+                className="resize-none"
+                name="note"
+                maxLength={144}
+                value={editNoteText}
+                onChange={(e) => setEditNoteText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    e.currentTarget.form?.requestSubmit()
+                  }
+                }}
+              />
+
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline" type="button">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={editNoteText.trim().length === 0 || editNoteText === currentNote.note}
+                >
+                  Edit
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

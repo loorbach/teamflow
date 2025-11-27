@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { DialogClose, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -11,50 +13,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { EmployeeNote, EmployeeWithNotes } from '@/db/types'
+import { EmployeeWithNotes, Role, Team } from '@/db/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Slider } from './ui/slider'
 
-const roles = [
-  { label: 'Developer', value: 'role-dev' },
-  { label: 'Manager', value: 'role-mgr' },
-  { label: 'Junior Developer', value: 'role-jr' },
-  { label: 'QA Engineer', value: 'role-qa' },
-  { label: 'Support Engineer', value: 'role-sup' },
-  { label: 'Designer', value: 'role-des' },
-  { label: 'Senior Developer', value: 'role-sr' },
-]
-
-type SendEmployee = {
-  firstName: string
-  lastName: string
-  fte: number
-  roleId: string
-  teamId: string
-  notes: EmployeeNote[]
-}
+type EmployeeToBackend = Omit<EmployeeWithNotes, 'id' | 'sortIndex'>
 
 function AddEmployeeForm({
   onEmployeeAdded,
   onClose,
+  teams,
+  roles,
 }: {
   onEmployeeAdded: (employee: EmployeeWithNotes) => void
   onClose: () => void
+  teams: Team[]
+  roles: Role[]
 }) {
   const [fte, setFte] = useState<number>(1.0)
   const [roleId, setRoleId] = useState<string>('')
   const [teamId, setTeamId] = useState<string>('')
+  const roleMap = new Map(roles.map((role) => [role.id, role.name]))
 
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)
-        const newEmployee: SendEmployee = {
+        const roleName = roleMap.get(roleId)
+        const newEmployee: EmployeeToBackend = {
           firstName: formData.get('firstName') as string,
           lastName: formData.get('lastName') as string,
           fte: fte,
+          role: { id: roleId, name: roleName as string },
           roleId: roleId,
           teamId: teamId,
           notes: [],
@@ -106,8 +98,8 @@ function AddEmployeeForm({
             <SelectGroup>
               <SelectLabel>Roles</SelectLabel>
               {roles.map((role) => (
-                <SelectItem key={role.value} value={role.value}>
-                  {role.label}
+                <SelectItem key={role.id} value={role.id}>
+                  {role.name}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -121,14 +113,11 @@ function AddEmployeeForm({
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Teams</SelectLabel>
-              <SelectItem value="team-a">Team A</SelectItem>
-              <SelectItem value="team-b">Team B</SelectItem>
-              <SelectItem value="team-c">Team C</SelectItem>
-              <SelectItem value="team-d">Team D</SelectItem>
-              <SelectItem value="team-e">Team E</SelectItem>
-              <SelectItem value="team-f">Team F</SelectItem>
-              <SelectItem value="team-g">Team G</SelectItem>
-              <SelectItem value="team-h">Team H</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id}>
+                  {team.name}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
