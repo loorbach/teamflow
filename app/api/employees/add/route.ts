@@ -11,6 +11,10 @@ const NewEmployeeSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   fte: z.coerce.number().min(0).max(1),
+  role: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
   roleId: z.string().min(1),
   teamId: z.string().min(1),
   notes: z.array(z.custom<EmployeeNote>()).length(0),

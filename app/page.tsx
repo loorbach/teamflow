@@ -21,6 +21,7 @@ async function Home() {
     .leftJoin(roles, eq(employees.roleId, roles.id))
     .orderBy(asc(employees.sortIndex))
   const employeeNoteList = await db.select().from(employeeNotes)
+  const roleList = await db.select().from(roles)
 
   console.log('emp list', employeesList)
 
@@ -75,11 +76,12 @@ async function Home() {
     teamArray.push(roleTarget)
   })
 
-  console.log('rolesbyTeam map', rolesByTeam)
+  console.log('roleList', roleList, teamList)
 
   return (
     <HomeWrapper
       teams={teamList}
+      roles={roleList}
       initialEmployees={Object.fromEntries(employeesByTeam)}
       roleTargets={rolesByTeam}
     />

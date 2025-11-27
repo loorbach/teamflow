@@ -11,11 +11,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { EmployeeWithNotes } from '@/db/types'
+import { EmployeeWithNotes, Role, Team } from '@/db/types'
 import { useState } from 'react'
 import { AddEmployeeDialog } from './add-employee-dialog'
 
-function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWithNotes) => void }) {
+type Props = {
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void
+  teams: Team[]
+  roles: Role[]
+}
+
+function MainMenu({ onEmployeeAdded, teams, roles }: Props) {
   const [openAddEmployeeDialog, setOpenAddEmployeeDialog] = useState(false)
 
   return (
@@ -58,6 +64,8 @@ function MainMenu({ onEmployeeAdded }: { onEmployeeAdded: (employee: EmployeeWit
         open={openAddEmployeeDialog}
         onOpenChange={setOpenAddEmployeeDialog}
         onEmployeeAdded={onEmployeeAdded}
+        teams={teams}
+        roles={roles}
       />
     </>
   )
