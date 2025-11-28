@@ -1,1 +1,0 @@
-ALTER TABLE "employee_notes" ALTER COLUMN "note" SET DATA TYPE varchar(144);
