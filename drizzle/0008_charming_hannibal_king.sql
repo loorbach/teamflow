@@ -17,7 +17,6 @@ ALTER TABLE "session" DROP CONSTRAINT "session_userId_user_id_fk";
 --> statement-breakpoint
 ALTER TABLE "user" ALTER COLUMN "name" SET NOT NULL;--> statement-breakpoint
 ALTER TABLE "user" ALTER COLUMN "email" SET NOT NULL;--> statement-breakpoint
-ALTER TABLE "account" ADD COLUMN "id" text PRIMARY KEY NOT NULL;--> statement-breakpoint
 ALTER TABLE "account" ADD COLUMN "account_id" text NOT NULL;--> statement-breakpoint
 ALTER TABLE "account" ADD COLUMN "provider_id" text NOT NULL;--> statement-breakpoint
 ALTER TABLE "account" ADD COLUMN "user_id" text NOT NULL;--> statement-breakpoint
@@ -26,7 +25,6 @@ ALTER TABLE "account" ADD COLUMN "refresh_token_expires_at" timestamp;--> statem
 ALTER TABLE "account" ADD COLUMN "password" text;--> statement-breakpoint
 ALTER TABLE "account" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
 ALTER TABLE "account" ADD COLUMN "updated_at" timestamp NOT NULL;--> statement-breakpoint
-ALTER TABLE "session" ADD COLUMN "id" text PRIMARY KEY NOT NULL;--> statement-breakpoint
 ALTER TABLE "session" ADD COLUMN "expires_at" timestamp NOT NULL;--> statement-breakpoint
 ALTER TABLE "session" ADD COLUMN "token" text NOT NULL;--> statement-breakpoint
 ALTER TABLE "session" ADD COLUMN "created_at" timestamp DEFAULT now() NOT NULL;--> statement-breakpoint
