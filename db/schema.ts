@@ -9,7 +9,7 @@ import {
   text,
   timestamp,
   varchar,
-} from 'drizzle-orm/pg-core'
+} from 'drizzle-orm/pg-core';
 
 //auth
 
@@ -24,7 +24,7 @@ export const user = pgTable('user', {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-})
+});
 
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
@@ -39,7 +39,7 @@ export const session = pgTable('session', {
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-})
+});
 
 export const account = pgTable('account', {
   id: text('id').primaryKey(),
@@ -59,7 +59,7 @@ export const account = pgTable('account', {
   updatedAt: timestamp('updated_at')
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-})
+});
 
 export const verification = pgTable('verification', {
   id: text('id').primaryKey(),
@@ -71,7 +71,7 @@ export const verification = pgTable('verification', {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
-})
+});
 
 //core functionality
 export const roles = pgTable('roles', {
@@ -79,14 +79,14 @@ export const roles = pgTable('roles', {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull().unique(),
-})
+});
 
 export const teams = pgTable('teams', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull(),
-})
+});
 
 export const employees = pgTable(
   'employees',
@@ -106,9 +106,9 @@ export const employees = pgTable(
   (table) => {
     return {
       teamIdIndex: index('idx_employees_team_id').on(table.teamId),
-    }
-  }
-)
+    };
+  },
+);
 
 export const teamRoleTargets = pgTable(
   'team_role_targets',
@@ -123,8 +123,8 @@ export const teamRoleTargets = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.teamId, table.roleId] }),
-  })
-)
+  }),
+);
 
 export const employeeNotes = pgTable('employee_notes', {
   id: text('id')
@@ -140,4 +140,4 @@ export const employeeNotes = pgTable('employee_notes', {
     .references(() => user.id),
   note: varchar('note', { length: 144 }).notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow(),
-})
+});

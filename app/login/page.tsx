@@ -1,13 +1,13 @@
-import { SignInForm } from '@/components/signin-form'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { SignInForm } from '@/components/signin-form';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export default async function Page() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (session && session.user) {
-    redirect('/')
+    redirect('/');
   }
 
   return (
@@ -16,5 +16,5 @@ export default async function Page() {
         <SignInForm />
       </div>
     </div>
-  )
+  );
 }
