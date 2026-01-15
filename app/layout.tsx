@@ -1,37 +1,39 @@
-import { ThemeProvider } from '@/components/theme-provider'
-import { Toaster } from '@/components/ui/sonner'
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
-})
+});
 
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
-})
+});
 
 export const metadata: Metadata = {
   title: 'Teamflow',
   description: 'Manage employees',
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <main>{children}</main>
           <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

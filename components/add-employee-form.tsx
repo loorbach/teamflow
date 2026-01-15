@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { DialogClose, DialogFooter } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button';
+import { DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -12,13 +12,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { EmployeeWithNotes, Role, Team } from '@/db/types'
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { Slider } from './ui/slider'
+} from '@/components/ui/select';
+import { EmployeeWithNotes, Role, Team } from '@/db/types';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Slider } from './ui/slider';
 
-type EmployeeToBackend = Omit<EmployeeWithNotes, 'id' | 'sortIndex'>
+type EmployeeToBackend = Omit<EmployeeWithNotes, 'id' | 'sortIndex'>;
 
 function AddEmployeeForm({
   onEmployeeAdded,
@@ -26,22 +26,22 @@ function AddEmployeeForm({
   teams,
   roles,
 }: {
-  onEmployeeAdded: (employee: EmployeeWithNotes) => void
-  onClose: () => void
-  teams: Team[]
-  roles: Role[]
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void;
+  onClose: () => void;
+  teams: Team[];
+  roles: Role[];
 }) {
-  const [fte, setFte] = useState<number>(1.0)
-  const [roleId, setRoleId] = useState<string>('')
-  const [teamId, setTeamId] = useState<string>('')
-  const roleMap = new Map(roles.map((role) => [role.id, role.name]))
+  const [fte, setFte] = useState<number>(1.0);
+  const [roleId, setRoleId] = useState<string>('');
+  const [teamId, setTeamId] = useState<string>('');
+  const roleMap = new Map(roles.map((role) => [role.id, role.name]));
 
   return (
     <form
       onSubmit={async (e) => {
-        e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-        const roleName = roleMap.get(roleId)
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const roleName = roleMap.get(roleId);
         const newEmployee: EmployeeToBackend = {
           firstName: formData.get('firstName') as string,
           lastName: formData.get('lastName') as string,
@@ -50,27 +50,30 @@ function AddEmployeeForm({
           roleId: roleId,
           teamId: teamId,
           notes: [],
-        }
+        };
 
         try {
           const res = await fetch('/api/employees/add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEmployee),
-          })
+          });
 
           if (res.ok) {
-            const resEmployee: EmployeeWithNotes = await res.json()
-            if (!resEmployee || !resEmployee.teamId) return
-            console.warn('resemp!!', resEmployee)
-            const validEmployee = { ...resEmployee, teamId: resEmployee.teamId }
-            onEmployeeAdded(validEmployee)
-            onClose()
-            toast.success('Employee added succesfully') //improve later
+            const resEmployee: EmployeeWithNotes = await res.json();
+            if (!resEmployee || !resEmployee.teamId) return;
+            console.warn('resemp!!', resEmployee);
+            const validEmployee = {
+              ...resEmployee,
+              teamId: resEmployee.teamId,
+            };
+            onEmployeeAdded(validEmployee);
+            onClose();
+            toast.success('Employee added succesfully'); //improve later
           }
         } catch (error) {
-          console.error('Failed to persist:', error)
-          toast.error('Failed to save new employee')
+          console.error('Failed to persist:', error);
+          toast.error('Failed to save new employee');
         }
       }}
       className="flex flex-col gap-4"
@@ -85,7 +88,12 @@ function AddEmployeeForm({
       </div>
       <Label htmlFor="fte">FTE</Label>
       <div className="flex justify-between gap-6 items-center">
-        <Slider defaultValue={[fte]} max={1} step={0.1} onValueChange={(val) => setFte(val[0])} />
+        <Slider
+          defaultValue={[fte]}
+          max={1}
+          step={0.1}
+          onValueChange={(val) => setFte(val[0])}
+        />
         <span className="text-sm text-muted-foreground">{fte.toFixed(1)}</span>
         <input type="number" name="fte" value={fte} hidden readOnly />
       </div>
@@ -133,7 +141,7 @@ function AddEmployeeForm({
         </Button>
       </DialogFooter>
     </form>
-  )
+  );
 }
 
-export default AddEmployeeForm
+export default AddEmployeeForm;

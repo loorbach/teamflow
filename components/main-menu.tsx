@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import signOutAction from '@/app/actions/signOut'
-import { Button } from '@/components/ui/button'
+import signOutAction from '@/app/actions/signOut';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,19 +10,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { EmployeeWithNotes, Role, Team } from '@/db/types'
-import { useState } from 'react'
-import { AddEmployeeDialog } from './add-employee-dialog'
+} from '@/components/ui/dropdown-menu';
+import { EmployeeWithNotes, Role, Team } from '@/db/types';
+import { useState } from 'react';
+import { AddEmployeeDialog } from './add-employee-dialog';
 
 type Props = {
-  onEmployeeAdded: (employee: EmployeeWithNotes) => void
-  teams: Team[]
-  roles: Role[]
-}
+  onEmployeeAdded: (employee: EmployeeWithNotes) => void;
+  teams: Team[];
+  roles: Role[];
+};
 
 function MainMenu({ onEmployeeAdded, teams, roles }: Props) {
-  const [openAddEmployeeDialog, setOpenAddEmployeeDialog] = useState(false)
+  const [openAddEmployeeDialog, setOpenAddEmployeeDialog] = useState(false);
 
   return (
     <>
@@ -68,7 +68,7 @@ function MainMenu({ onEmployeeAdded, teams, roles }: Props) {
         roles={roles}
       />
     </>
-  )
+  );
 }
 
-export default MainMenu
+export default MainMenu;

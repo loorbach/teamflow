@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { addNote, deleteNote, editNote } from '@/app/actions/notes'
-import { EmployeeWithNotes } from '@/db/types'
-import { UniqueIdentifier } from '@dnd-kit/abstract'
-import { useSortable } from '@dnd-kit/react/sortable'
-import { AnimatePresence, motion } from 'framer-motion'
-import { EllipsisVertical, MessageCircleMore, PenLine } from 'lucide-react'
-import { useState } from 'react'
-import { Badge } from './ui/badge'
-import { Button } from './ui/button'
+import { addNote, deleteNote, editNote } from '@/app/actions/notes';
+import { EmployeeWithNotes } from '@/db/types';
+import { UniqueIdentifier } from '@dnd-kit/abstract';
+import { useSortable } from '@dnd-kit/react/sortable';
+import { AnimatePresence, motion } from 'framer-motion';
+import { EllipsisVertical, MessageCircleMore, PenLine } from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 import {
   Dialog,
   DialogClose,
@@ -17,27 +17,27 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog'
+} from './ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { Textarea } from './ui/textarea'
+} from './ui/dropdown-menu';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Textarea } from './ui/textarea';
 
 type Props = {
-  employee: EmployeeWithNotes
-  index: number
-  teamId: string
+  employee: EmployeeWithNotes;
+  index: number;
+  teamId: string;
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
-  >
-}
+  >;
+};
 
 function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
   const { ref } = useSortable({
@@ -46,82 +46,88 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
     type: 'employee',
     accept: 'employee',
     group: teamId,
-  })
+  });
   // isDragging and isDropTarget will cause employeeCard rerendering of sortables in question
-  const [expanded, setExpanded] = useState(false)
-  const [noteText, setNoteText] = useState('')
-  const [popoverOpen, setPopoverOpen] = useState(false)
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
-  const [editNoteText, setEditNoteText] = useState('')
-  const [showEditDialog, setShowEditDialog] = useState(false)
-  const noteCount = employee.notes.length
-  const currentNote = employee.notes.find((n) => n.id === editingNoteId)
+  const [expanded, setExpanded] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editNoteText, setEditNoteText] = useState('');
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const noteCount = employee.notes.length;
+  const currentNote = employee.notes.find((n) => n.id === editingNoteId);
   // console.log('employee data:', employee)
   // console.log('rerendering employee:', employee.firstName, employee.lastName)
 
   const handleDeleteNote = async (noteId: string) => {
-    await deleteNote(noteId)
+    await deleteNote(noteId);
     setEmployeesByTeam((prevMap) => {
-      const newMap = new Map(prevMap)
-      const teamId = employee.teamId?.toString()
-      if (!teamId) return prevMap
-      const team = prevMap.get(teamId)
-      if (!team) return prevMap
+      const newMap = new Map(prevMap);
+      const teamId = employee.teamId?.toString();
+      if (!teamId) return prevMap;
+      const team = prevMap.get(teamId);
+      if (!team) return prevMap;
       const newTeam = team.map((emp) => {
         if (emp.id === employee.id) {
-          const newNotes = emp.notes.filter((n) => noteId !== n.id)
-          return { ...emp, notes: newNotes }
+          const newNotes = emp.notes.filter((n) => noteId !== n.id);
+          return { ...emp, notes: newNotes };
         }
-        return emp
-      })
-      newMap.set(teamId, newTeam)
-      return newMap
-    })
-  }
+        return emp;
+      });
+      newMap.set(teamId, newTeam);
+      return newMap;
+    });
+  };
 
   const handleAddNote = async (formData: FormData) => {
-    const note = await addNote(formData)
+    const note = await addNote(formData);
     setEmployeesByTeam((prevMap) => {
-      const newMap = new Map(prevMap)
-      const teamId = employee.teamId?.toString()
-      if (!teamId) return prevMap
-      const team = prevMap.get(teamId)
-      if (!team) return prevMap
+      const newMap = new Map(prevMap);
+      const teamId = employee.teamId?.toString();
+      if (!teamId) return prevMap;
+      const team = prevMap.get(teamId);
+      if (!team) return prevMap;
       const newTeam = team.map((emp) =>
-        emp.id === employee.id ? { ...emp, notes: [...emp.notes, note] } : emp
-      )
-      newMap.set(teamId, newTeam)
-      return newMap
-    })
-    setNoteText('')
-    setPopoverOpen(false)
-  }
+        emp.id === employee.id ? { ...emp, notes: [...emp.notes, note] } : emp,
+      );
+      newMap.set(teamId, newTeam);
+      return newMap;
+    });
+    setNoteText('');
+    setPopoverOpen(false);
+  };
 
-  const handleEditNote = async (noteId: string, formData: FormData, employeeId: string) => {
+  const handleEditNote = async (
+    noteId: string,
+    formData: FormData,
+    employeeId: string,
+  ) => {
     // console.log('made it inside handleEdit note with', noteId, formData.get('note'), employeeId)
-    const updatedNote = await editNote(formData, noteId, employeeId)
+    const updatedNote = await editNote(formData, noteId, employeeId);
 
     setEmployeesByTeam((prevMap) => {
-      const newMap = new Map(prevMap)
-      const teamId = employee.teamId?.toString()
-      if (!teamId) return prevMap
-      const team = prevMap.get(teamId)
-      if (!team) return prevMap
+      const newMap = new Map(prevMap);
+      const teamId = employee.teamId?.toString();
+      if (!teamId) return prevMap;
+      const team = prevMap.get(teamId);
+      if (!team) return prevMap;
       const newTeam = team.map((emp) => {
         if (emp.id === employee.id) {
-          const newNotes = emp.notes.map((note) => (note.id === noteId ? updatedNote : note))
-          return { ...emp, notes: newNotes }
+          const newNotes = emp.notes.map((note) =>
+            note.id === noteId ? updatedNote : note,
+          );
+          return { ...emp, notes: newNotes };
         }
-        return emp
-      })
+        return emp;
+      });
 
-      newMap.set(teamId, newTeam)
-      return newMap
-    })
+      newMap.set(teamId, newTeam);
+      return newMap;
+    });
 
-    setEditingNoteId(null)
-    setShowEditDialog(false)
-  }
+    setEditingNoteId(null);
+    setShowEditDialog(false);
+  };
 
   return (
     <div
@@ -132,8 +138,8 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
         className="flex justify-between items-start text-sm gap-2 active:scale-99 active:outline-none active:shadow-none duration-150 ease-out transition-all"
         role="button"
         onClick={(e) => {
-          e.stopPropagation()
-          setExpanded((prev) => !prev)
+          e.stopPropagation();
+          setExpanded((prev) => !prev);
         }}
       >
         <div className="flex flex-col overflow-hidden">
@@ -173,15 +179,23 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                   className="flex justify-between items-center overflow-hidden border-t py-1.5"
                 >
                   <div>
-                    <div className="text-secondary-foreground font-medium">{note.note}</div>
+                    <div className="text-secondary-foreground font-medium">
+                      {note.note}
+                    </div>
                     <div className="text-[11px] text-muted-foreground">
-                      {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
+                      {note.createdAt
+                        ? new Date(note.createdAt).toDateString()
+                        : 'Unknown date'}
                     </div>
                   </div>
 
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" aria-label="Open menu" size="icon-sm">
+                      <Button
+                        variant="ghost"
+                        aria-label="Open menu"
+                        size="icon-sm"
+                      >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
@@ -189,14 +203,16 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onSelect={() => {
-                            setEditingNoteId(note.id)
-                            setEditNoteText(note.note)
-                            setShowEditDialog(true)
+                            setEditingNoteId(note.id);
+                            setEditNoteText(note.note);
+                            setShowEditDialog(true);
                           }}
                         >
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleDeleteNote(note.id)}>
+                        <DropdownMenuItem
+                          onSelect={() => handleDeleteNote(note.id)}
+                        >
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -221,8 +237,14 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                     className="flex flex-col gap-3"
                     action={(formData) => handleAddNote(formData)}
                   >
-                    <h4 className="leading-none text-sm">Type to add a note.</h4>
-                    <input type="hidden" name="employeeId" value={employee.id} />
+                    <h4 className="leading-none text-sm">
+                      Type to add a note.
+                    </h4>
+                    <input
+                      type="hidden"
+                      name="employeeId"
+                      value={employee.id}
+                    />
                     <Textarea
                       autoFocus
                       required
@@ -232,11 +254,11 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                       onChange={(e) => setNoteText(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault()
-                          e.currentTarget.form?.requestSubmit()
+                          e.preventDefault();
+                          e.currentTarget.form?.requestSubmit();
                         }
                         if (e.key === 'Escape') {
-                          setPopoverOpen(false)
+                          setPopoverOpen(false);
                         }
                       }}
                     />
@@ -261,12 +283,14 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
             <DialogHeader>
               <DialogTitle>Edit note</DialogTitle>
               <DialogDescription>
-                Edit an existing note for {employee.firstName} {employee.lastName}. Click edit when
-                you&apos;re done.
+                Edit an existing note for {employee.firstName}{' '}
+                {employee.lastName}. Click edit when you&apos;re done.
               </DialogDescription>
             </DialogHeader>
             <form
-              action={(formData) => handleEditNote(currentNote.id, formData, employee.id)}
+              action={(formData) =>
+                handleEditNote(currentNote.id, formData, employee.id)
+              }
               className="flex flex-col gap-4"
             >
               <Label htmlFor="editNoteInput" className="sr-only"></Label>
@@ -279,8 +303,8 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 onChange={(e) => setEditNoteText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    e.currentTarget.form?.requestSubmit()
+                    e.preventDefault();
+                    e.currentTarget.form?.requestSubmit();
                   }
                 }}
               />
@@ -294,7 +318,10 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 <Button
                   type="submit"
                   variant="outline"
-                  disabled={editNoteText.trim().length === 0 || editNoteText === currentNote.note}
+                  disabled={
+                    editNoteText.trim().length === 0 ||
+                    editNoteText === currentNote.note
+                  }
                 >
                   Edit
                 </Button>
@@ -304,7 +331,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
         </Dialog>
       )}
     </div>
-  )
+  );
 }
 
-export default EmployeeCard
+export default EmployeeCard;
