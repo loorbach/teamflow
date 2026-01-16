@@ -76,15 +76,10 @@ const editSchema = z.object({
   noteText: z.string().trim().min(1).max(144),
 });
 
-export async function editNote(
-  formData: FormData,
-  noteId: string,
-  employeeId: string,
-) {
+export async function editNote(formData: FormData, noteId: string, employeeId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session || !session.user || !session.user.id)
-    throw new Error('Not authenticated');
+  if (!session || !session.user || !session.user.id) throw new Error('Not authenticated');
 
   const parsed = editSchema.safeParse({
     employeeId,
@@ -102,12 +97,7 @@ export async function editNote(
     const [updatedNote] = await db
       .update(employeeNotes)
       .set({ note: noteText })
-      .where(
-        and(
-          eq(employeeNotes.id, noteId),
-          eq(employeeNotes.employeeId, employeeId),
-        ),
-      )
+      .where(and(eq(employeeNotes.id, noteId), eq(employeeNotes.employeeId, employeeId)))
       .returning();
 
     console.log(updatedNote);

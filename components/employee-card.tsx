@@ -97,11 +97,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
     setPopoverOpen(false);
   };
 
-  const handleEditNote = async (
-    noteId: string,
-    formData: FormData,
-    employeeId: string,
-  ) => {
+  const handleEditNote = async (noteId: string, formData: FormData, employeeId: string) => {
     // console.log('made it inside handleEdit note with', noteId, formData.get('note'), employeeId)
     const updatedNote = await editNote(formData, noteId, employeeId);
 
@@ -113,9 +109,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
       if (!team) return prevMap;
       const newTeam = team.map((emp) => {
         if (emp.id === employee.id) {
-          const newNotes = emp.notes.map((note) =>
-            note.id === noteId ? updatedNote : note,
-          );
+          const newNotes = emp.notes.map((note) => (note.id === noteId ? updatedNote : note));
           return { ...emp, notes: newNotes };
         }
         return emp;
@@ -179,23 +173,15 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                   className="flex justify-between items-center overflow-hidden border-t py-1.5"
                 >
                   <div>
-                    <div className="text-secondary-foreground font-medium">
-                      {note.note}
-                    </div>
+                    <div className="text-secondary-foreground font-medium">{note.note}</div>
                     <div className="text-[11px] text-muted-foreground">
-                      {note.createdAt
-                        ? new Date(note.createdAt).toDateString()
-                        : 'Unknown date'}
+                      {note.createdAt ? new Date(note.createdAt).toDateString() : 'Unknown date'}
                     </div>
                   </div>
 
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        aria-label="Open menu"
-                        size="icon-sm"
-                      >
+                      <Button variant="ghost" aria-label="Open menu" size="icon-sm">
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
@@ -210,9 +196,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                         >
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => handleDeleteNote(note.id)}
-                        >
+                        <DropdownMenuItem onSelect={() => handleDeleteNote(note.id)}>
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -237,14 +221,8 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                     className="flex flex-col gap-3"
                     action={(formData) => handleAddNote(formData)}
                   >
-                    <h4 className="leading-none text-sm">
-                      Type to add a note.
-                    </h4>
-                    <input
-                      type="hidden"
-                      name="employeeId"
-                      value={employee.id}
-                    />
+                    <h4 className="leading-none text-sm">Type to add a note.</h4>
+                    <input type="hidden" name="employeeId" value={employee.id} />
                     <Textarea
                       autoFocus
                       required
@@ -283,14 +261,12 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
             <DialogHeader>
               <DialogTitle>Edit note</DialogTitle>
               <DialogDescription>
-                Edit an existing note for {employee.firstName}{' '}
-                {employee.lastName}. Click edit when you&apos;re done.
+                Edit an existing note for {employee.firstName} {employee.lastName}. Click edit when
+                you&apos;re done.
               </DialogDescription>
             </DialogHeader>
             <form
-              action={(formData) =>
-                handleEditNote(currentNote.id, formData, employee.id)
-              }
+              action={(formData) => handleEditNote(currentNote.id, formData, employee.id)}
               className="flex flex-col gap-4"
             >
               <Label htmlFor="editNoteInput" className="sr-only"></Label>
@@ -318,10 +294,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                 <Button
                   type="submit"
                   variant="outline"
-                  disabled={
-                    editNoteText.trim().length === 0 ||
-                    editNoteText === currentNote.note
-                  }
+                  disabled={editNoteText.trim().length === 0 || editNoteText === currentNote.note}
                 >
                   Edit
                 </Button>

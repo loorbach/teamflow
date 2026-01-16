@@ -24,8 +24,8 @@ export function ConfirmDeleteDialog({ open, onConfirm, onCancel }: Props) {
         <AlertDialogHeader>
           <AlertDialogTitle>Remove employee?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            employee and their notes from our servers.
+            This action cannot be undone. This will permanently delete the employee and their notes
+            from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

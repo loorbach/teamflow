@@ -1,10 +1,4 @@
-import {
-  employeeNotes,
-  employees,
-  roles,
-  teamRoleTargets,
-  teams,
-} from '@/db/schema';
+import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema';
 import { InferSelectModel } from 'drizzle-orm';
 
 export type Employee = InferSelectModel<typeof employees>;

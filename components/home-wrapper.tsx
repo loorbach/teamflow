@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  Employee,
-  EmployeeWithNotes,
-  Role,
-  RoleTargetWithName,
-  Team,
-} from '@/db/types';
+import { Employee, EmployeeWithNotes, Role, RoleTargetWithName, Team } from '@/db/types';
 import { UniqueIdentifier } from '@dnd-kit/abstract';
 import { RestrictToWindow } from '@dnd-kit/dom/modifiers';
 import { DragDropProvider } from '@dnd-kit/react';
@@ -28,10 +22,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
   const [employeesByTeam, setEmployeesByTeam] = useState<
     Map<UniqueIdentifier, EmployeeWithNotes[]>
   >(() => new Map(Object.entries(initialEmployees)));
-  const [employeeToDelete, setEmployeeToDelete] =
-    useState<EmployeeWithNotes | null>(null);
-  const previousEmployeeRef =
-    useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam);
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeWithNotes | null>(null);
+  const previousEmployeeRef = useRef<Map<UniqueIdentifier, EmployeeWithNotes[]>>(employeesByTeam);
   const [dragging, setDragging] = useState(false);
 
   // console.log('empbt val', employeesByTeam.values())
@@ -44,9 +36,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
     }
   }
 
-  function findContainerId(
-    itemId: number | string,
-  ): UniqueIdentifier | undefined {
+  function findContainerId(itemId: number | string): UniqueIdentifier | undefined {
     if (teams.some((team) => team.id === itemId)) return itemId;
 
     for (const [teamId, employees] of employeesByTeam.entries()) {

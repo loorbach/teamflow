@@ -17,9 +17,7 @@ function Header({ onEmployeeAdded, teams, roles }: Props) {
       <MainMenu onEmployeeAdded={onEmployeeAdded} roles={roles} teams={teams} />
       <div className="flex items-center gap-2">
         {session?.user && (
-          <h1 className="text-muted-foreground text-sm">
-            welcome {session?.user.name}
-          </h1>
+          <h1 className="text-muted-foreground text-sm">welcome {session?.user.name}</h1>
         )}
         <ModeToggle />
       </div>
