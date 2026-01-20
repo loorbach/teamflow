@@ -35,12 +35,7 @@ const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
   return equal;
 });
 
-function DnDContainer({
-  employeesByTeam,
-  teams,
-  roleTargets,
-  setEmployeesByTeam,
-}: Props) {
+function DnDContainer({ employeesByTeam, teams, roleTargets, setEmployeesByTeam }: Props) {
   return (
     <div className="flex gap-4 flex-wrap px-4 py-2 items-start">
       {teams.map((team) => {

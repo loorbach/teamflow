@@ -31,12 +31,7 @@ const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
   return equal;
 });
 
-function TeamColumn({
-  team,
-  employees,
-  teamRoleTargets,
-  setEmployeesByTeam,
-}: Props) {
+function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const { isDropTarget, ref } = useDroppable({
     id: team.id,
@@ -63,10 +58,7 @@ function TeamColumn({
         <span className="inline-flex items-center font-mono tracking-tighter text-card-foreground">
           {currentTotalFte.toFixed(1)}/{teamTotalFte.toFixed(1)}
           {Math.abs(currentTotalFte - teamTotalFte) > 1 && (
-            <TriangleAlert
-              className="ml-2 size-4 text-[var(--destructive)]"
-              strokeWidth={2}
-            />
+            <TriangleAlert className="ml-2 size-4 text-[var(--destructive)]" strokeWidth={2} />
           )}
         </span>
         <Button
@@ -76,10 +68,7 @@ function TeamColumn({
           onClick={() => setOpen((prev) => !prev)}
         >
           <ChevronDown
-            className={cn(
-              'transition-transform duration-200 ease-out',
-              open && 'rotate-180',
-            )}
+            className={cn('transition-transform duration-200 ease-out', open && 'rotate-180')}
           />
         </Button>
       </div>
@@ -94,16 +83,9 @@ function TeamColumn({
             {teamRoleTargets
               .filter((target) => target.teamId === team.id)
               .map((target) => {
-                const employeesInRole = employees.filter(
-                  (e) => e.roleId === target.roleId,
-                );
-                const currentFte = employeesInRole.reduce(
-                  (sum, e) => sum + e.fte,
-                  0,
-                );
-                const delta = Math.abs(
-                  currentFte - parseFloat(target.targetFte),
-                );
+                const employeesInRole = employees.filter((e) => e.roleId === target.roleId);
+                const currentFte = employeesInRole.reduce((sum, e) => sum + e.fte, 0);
+                const delta = Math.abs(currentFte - parseFloat(target.targetFte));
 
                 let color = 'text-destructive';
                 if (delta <= 0.1) {
@@ -119,8 +101,7 @@ function TeamColumn({
                   >
                     <span>{target.roleName}</span>
                     <span className={color}>
-                      {currentFte.toFixed(1)} /{' '}
-                      {parseFloat(target.targetFte).toFixed(1)}
+                      {currentFte.toFixed(1)} / {parseFloat(target.targetFte).toFixed(1)}
                     </span>
                   </li>
                 );

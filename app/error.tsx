@@ -9,9 +9,7 @@ function Error() {
       <div className="flex flex-col justify-center items-center gap-2 max-w-sm rounded-lg border border-border bg-card p-6 text-center shadow">
         <BadgeAlert size={32} />
         <Link href="/">
-          <h5 className="text-xl font-bold tracking-tight text-foreground">
-            Something went wrong
-          </h5>
+          <h5 className="text-xl font-bold tracking-tight text-foreground">Something went wrong</h5>
         </Link>
         <div className="font-normal text-muted-foreground">
           <p>Please contact us if this error persists.</p>

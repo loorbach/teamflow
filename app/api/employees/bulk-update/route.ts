@@ -56,9 +56,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
     console.error('PATCH error', error);
-    return NextResponse.json(
-      { error: 'Failed to update employees' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Failed to update employees' }, { status: 500 });
   }
 }

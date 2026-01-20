@@ -1,17 +1,7 @@
 import HomeWrapper from '@/components/home-wrapper';
 import { db } from '@/db/client';
-import {
-  employeeNotes,
-  employees,
-  roles,
-  teamRoleTargets,
-  teams,
-} from '@/db/schema';
-import {
-  EmployeeNote,
-  EmployeeWithNotes,
-  RoleTargetWithName,
-} from '@/db/types';
+import { employeeNotes, employees, roles, teamRoleTargets, teams } from '@/db/schema';
+import { EmployeeNote, EmployeeWithNotes, RoleTargetWithName } from '@/db/types';
 import { auth } from '@/lib/auth';
 import { asc, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';

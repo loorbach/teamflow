@@ -26,9 +26,7 @@ export function AddEmployeeDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Employee</DialogTitle>
-          <DialogDescription>
-            Fill in details and save to add a new employee.
-          </DialogDescription>
+          <DialogDescription>Fill in details and save to add a new employee.</DialogDescription>
         </DialogHeader>
         <AddEmployeeForm
           onEmployeeAdded={onEmployeeAdded}
