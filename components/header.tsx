@@ -2,6 +2,7 @@ import { EmployeeWithNotes, Role, Team } from '@/db/types';
 import { authClient } from '@/lib/auth-client';
 import MainMenu from './main-menu';
 import { ModeToggle } from './mode-toggle';
+import { SidebarTrigger } from './ui/sidebar';
 
 type Props = {
   onEmployeeAdded: (employee: EmployeeWithNotes) => void;
@@ -14,6 +15,7 @@ function Header({ onEmployeeAdded, teams, roles }: Props) {
 
   return (
     <header className="flex justify-between gap-8 items-center px-4 py-2">
+      <SidebarTrigger className="-ml-1" />
       <MainMenu onEmployeeAdded={onEmployeeAdded} roles={roles} teams={teams} />
       <div className="flex items-center gap-2">
         {session?.user && (

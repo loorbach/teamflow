@@ -1,19 +1,23 @@
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { Button } from '@/components/ui/button';
+import UsersTable from '@/components/users-table';
 
 async function Admin() {
-  const users = await auth.api.listUsers({
-    query: {},
-    headers: await headers(),
-  });
-
-  console.log(users);
-
   return (
-    <>
-      <h1>hallo</h1>
-      {users && users.users.map((user) => <p key={user.id}>{user.name}</p>)}
-    </>
+    <div className="min-h-screen">
+      <section id="table-section" className="py-4 max-w-lg mx-auto gap-4">
+        <div id="table-container" className="flex flex-col items-center justify-center">
+          <div
+            id="button-row"
+            className="w-full flex flex-wrap items-center gap-2 md:flex-row justify-end"
+          >
+            <Button size="sm" variant="outline">
+              Add User
+            </Button>
+          </div>
+          <UsersTable />
+        </div>
+      </section>
+    </div>
   );
 }
 
