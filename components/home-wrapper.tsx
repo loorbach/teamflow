@@ -7,6 +7,7 @@ import { DragDropProvider } from '@dnd-kit/react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDeleteDialog } from './confirm-delete-dialog';
+import ControlBar from './control-bar';
 import DnDContainer from './dnd-container';
 import Header from './header';
 import TrashZone from './trash-zone';
@@ -204,7 +205,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
 
   return (
     <>
-      <Header
+      <Header />
+      <ControlBar
         onEmployeeAdded={(newEmployee: EmployeeWithNotes) => {
           setEmployeesByTeam((prevMap) => {
             const newMap = new Map(prevMap);

@@ -1,3 +1,4 @@
+import Header from '@/components/header';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
@@ -11,7 +12,7 @@ async function Admin() {
 
   return (
     <>
-      <h1>hallo</h1>
+      <Header />
       {users && users.users.map((user) => <p key={user.id}>{user.name}</p>)}
     </>
   );
