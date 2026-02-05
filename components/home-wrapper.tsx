@@ -10,7 +10,6 @@ import { ConfirmDeleteDialog } from './confirm-delete-dialog';
 import DnDContainer from './dnd-container';
 import Header from './header';
 import TrashZone from './trash-zone';
-import { Button } from './ui/button';
 
 type Props = {
   initialEmployees: Record<string, EmployeeWithNotes[]>;
@@ -224,13 +223,6 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
         roles={roles}
         teams={teams}
       />
-      {!dragging && (
-        <div className="border border-red-400 flex justify-end">
-          <Button variant="outline" size="sm">
-            Add Employee
-          </Button>
-        </div>
-      )}
       <DragDropProvider
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}

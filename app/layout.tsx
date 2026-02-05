@@ -1,6 +1,4 @@
-import { AppSidebar } from '@/components/app-sidebar';
 import { ThemeProvider } from '@/components/theme-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -30,11 +28,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SidebarProvider>
-            <AppSidebar />
-            <main>{children}</main>
-            <Toaster position="top-right" />
-          </SidebarProvider>
+          <main>{children}</main>
+          <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>
