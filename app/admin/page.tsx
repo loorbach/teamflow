@@ -1,4 +1,5 @@
 import Header from '@/components/header';
+import Table from '@/components/users-table';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -10,17 +11,12 @@ async function Admin() {
     redirect('/login');
   }
 
-  const users = await auth.api.listUsers({
-    query: {},
-    headers: await headers(),
-  });
-
-  console.log(users);
-
   return (
     <>
       <Header />
-      {users && users.users.map((user) => <p key={user.id}>{user.name}</p>)}
+      <div className="max-w-md m-auto py-4">
+        <Table />
+      </div>
     </>
   );
 }
