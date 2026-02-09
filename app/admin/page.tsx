@@ -1,3 +1,4 @@
+import AdminControlBar from '@/components/admin-control-bar';
 import Header from '@/components/header';
 import Table from '@/components/users-table';
 import { auth } from '@/lib/auth';
@@ -14,7 +15,9 @@ async function Admin() {
   return (
     <>
       <Header />
-      <div className="max-w-md m-auto py-4">
+
+      <div className="max-w-lg m-auto py-4 flex flex-col gap-2">
+        <AdminControlBar />
         <Table />
       </div>
     </>

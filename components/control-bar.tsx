@@ -1,4 +1,5 @@
 import { EmployeeWithNotes, Role, Team } from '@/db/types';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { AddEmployeeDialog } from './add-employee-dialog';
 import { Button } from './ui/button';
@@ -16,7 +17,8 @@ function ControlBar({ onEmployeeAdded, teams, roles }: Props) {
     <>
       <div className="flex py-2 px-4 justify-end">
         <Button variant="outline" size="sm" onClick={() => setOpenAddEmployeeDialog(true)}>
-          Add employee
+          <Plus />
+          Add Employee
         </Button>
       </div>
 

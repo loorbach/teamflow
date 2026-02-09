@@ -1,6 +1,14 @@
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './ui/table';
 
 async function UsersTable() {
   const users = await auth.api.listUsers({
@@ -8,10 +16,11 @@ async function UsersTable() {
     headers: await headers(),
   });
 
-  console.log(users);
+  // console.log(users);
 
   return (
     <Table>
+      <TableCaption>A list of users.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[100px]">User ID</TableHead>
