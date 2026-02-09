@@ -26,6 +26,7 @@ function AddUserForm({ onClose }: { onClose: () => void }) {
 
   return (
     <form
+      className="flex flex-col gap-4"
       onSubmit={async (e) => {
         e.preventDefault();
         setIsPending(true);
@@ -35,27 +36,33 @@ function AddUserForm({ onClose }: { onClose: () => void }) {
         const name = formData.get('name') as string;
         const password = formData.get('password') as string;
 
-        const { data: newUser, error } = await authClient.admin.createUser({
-          email,
-          password,
-          name,
-          role: roleId,
-        });
+        try {
+          const { data: newUser, error } = await authClient.admin.createUser({
+            email,
+            password,
+            name,
+            role: roleId,
+          });
 
-        setIsPending(false);
+          setIsPending(false);
 
-        if (error) {
-          toast.error(error.message || 'Failed to create user');
-          return;
-        }
+          if (error) {
+            toast.error(error.message || 'Failed to create user');
+            return;
+          }
 
-        if (newUser) {
-          toast.success('User added succesfully');
-          onClose();
-          router.refresh();
+          if (newUser) {
+            toast.success('User added succesfully');
+            onClose();
+            router.refresh();
+          }
+        } catch (error) {
+          console.error('Unexpected error', error);
+          toast.error('An unexpected error occurred. Please try again.');
+        } finally {
+          setIsPending(false);
         }
       }}
-      className="flex flex-col gap-4"
     >
       <div className="grid gap-3">
         <Label htmlFor="name">Name</Label>
