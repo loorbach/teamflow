@@ -163,7 +163,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
             initial={{ y: -5, opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.05, ease: 'easeOut' }}
-            className="mt-2 text-xs hover:cursor-default"
+            className="mt-1.5 text-xs hover:cursor-default"
           >
             {employee.notes &&
               employee.notes.length > 0 &&
@@ -204,7 +204,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                   </DropdownMenu>
                 </div>
               ))}
-            <div className="border-t flex gap-2 items-center py-1">
+            <div className="border-t flex gap-2 items-center pt-1.5 pb-1">
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
