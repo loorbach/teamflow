@@ -29,6 +29,9 @@ export const user = pgTable('user', {
   banned: boolean('banned').default(false),
   banReason: text('ban_reason'),
   banExpires: timestamp('ban_expires'),
+  organization_id: text('organization_id')
+    .notNull()
+    .references(() => organizations.id),
 });
 
 export const session = pgTable(
@@ -118,11 +121,19 @@ export const roles = pgTable('roles', {
   name: text('name').notNull().unique(),
 });
 
+export const organizations = pgTable('organizations', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+});
+
 export const teams = pgTable('teams', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text('name').notNull(),
+  organizationId: text('organization_id')
+    .notNull()
+    .references(() => organizations.id),
 });
 
 export const employees = pgTable(
@@ -139,6 +150,9 @@ export const employees = pgTable(
       .references(() => roles.id),
     teamId: text('team_id').references(() => teams.id),
     sortIndex: integer('sort_index').notNull(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id),
   },
   (table) => {
     return {

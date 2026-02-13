@@ -9,7 +9,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -88,7 +87,6 @@ function AddUserForm({ onClose }: { onClose: () => void }) {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Roles</SelectLabel>
               <SelectItem value="user">User</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
             </SelectGroup>

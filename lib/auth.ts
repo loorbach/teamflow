@@ -18,4 +18,9 @@ export const auth = betterAuth({
     },
   },
   plugins: [nextCookies(), admin()],
+  user: {
+    additionalFields: {
+      organization_id: { type: 'string', required: true, fieldName: 'organization_id' },
+    },
+  },
 });
