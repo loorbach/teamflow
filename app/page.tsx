@@ -14,16 +14,23 @@ async function Home() {
     redirect('/login');
   }
 
-  const teamList = await db.select().from(teams);
+  console.log('logged in as:', session.user.name);
+  console.log('orgid', session.user.organization_id);
+
+  const teamList = await db
+    .select()
+    .from(teams)
+    .where(eq(teams.organizationId, session.user.organization_id));
   const employeesList = await db
     .select()
     .from(employees)
+    .where(eq(employees.organizationId, session.user.organization_id))
     .leftJoin(roles, eq(employees.roleId, roles.id))
     .orderBy(asc(employees.sortIndex));
   const employeeNoteList = await db.select().from(employeeNotes);
   const roleList = await db.select().from(roles);
 
-  // console.log('emp list', employeesList)
+  console.log('emp list', employeesList);
 
   const notesByEmployee = new Map<string, EmployeeNote[]>();
   employeeNoteList.forEach((note) => {
