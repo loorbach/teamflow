@@ -41,6 +41,8 @@ function AddUserForm({ onClose }: { onClose: () => void }) {
             password,
             name,
             role: roleId,
+            data: { organization_id: '550e8400-e29b-41d4-a716-446655440002' },
+            //zoek manier om org id inde client te halen. is dit echt nodig voor de admin ? om users te creeren en wachtwoorden te setten ? ik denk het misschien niet.
           });
 
           setIsPending(false);

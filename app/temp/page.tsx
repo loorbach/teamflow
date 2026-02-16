@@ -20,7 +20,6 @@ function Temp() {
                 name,
                 email,
                 password,
-                organization_id: orgId,
               },
             });
 
