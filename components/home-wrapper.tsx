@@ -63,13 +63,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
           })),
         }),
       });
-      toast.success('Employee has been moved', {
-        description: 'Click undo to revert this action',
-        action: {
-          label: 'Undo',
-          onClick: () => setEmployeesByTeam(previousState),
-        },
-      });
+      toast.success('Employee has been moved');
     } catch (error) {
       console.error('Failed to persist:', error);
       setEmployeesByTeam(previousState);
