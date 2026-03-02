@@ -22,7 +22,7 @@ const BulkUpdateSchema = z.object({
 export async function PATCH(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session || !session.user) {
+  if (!session || !session.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

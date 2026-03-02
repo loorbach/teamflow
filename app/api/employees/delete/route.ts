@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session || !session.user) {
+  if (!session || !session.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
