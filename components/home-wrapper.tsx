@@ -272,13 +272,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
                   body: JSON.stringify({ employeeId: employeeToDelete.id }),
                 });
 
-                toast.success('Employee has been removed', {
-                  description: 'Click undo to revert this action',
-                  action: {
-                    label: 'Undo',
-                    onClick: () => setEmployeesByTeam(previousState),
-                  },
-                });
+                toast.success('Employee has been removed');
 
                 setEmployeeToDelete(null);
               } catch (error) {
