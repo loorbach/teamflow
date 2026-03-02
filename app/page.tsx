@@ -14,8 +14,12 @@ async function Home() {
     redirect('/login');
   }
 
+  const isAdmin = session.user.role === 'admin';
+  console.log(isAdmin);
+
   console.log('logged in as:', session.user.name);
   console.log('orgid', session.user.organization_id);
+  console.log('user role', session.user.role);
 
   const teamList = await db
     .select()
@@ -87,6 +91,7 @@ async function Home() {
 
   return (
     <HomeWrapper
+      isAdmin={isAdmin}
       teams={teamList}
       roles={roleList}
       initialEmployees={Object.fromEntries(employeesByTeam)}

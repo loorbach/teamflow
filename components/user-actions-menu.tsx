@@ -1,7 +1,8 @@
 'use client';
 
-import { MoreHorizontalIcon } from 'lucide-react';
-import { useState } from 'react';
+import editRoleAction from '@/app/actions/editRole';
+import { AlertCircle, MoreHorizontalIcon } from 'lucide-react';
+import { useActionState, useState } from 'react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -15,32 +16,21 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { Label } from './ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
 import { Spinner } from './ui/spinner';
 
-interface UserActionsMenuProps {
+interface Props {
   userId: string;
   userName: string;
   currentRole: string;
 }
 
-async function handleRoleUpdate() {}
-
-function UserActionsMenu({ userId, userName, currentRole }: UserActionsMenuProps) {
+function UserActionsMenu({ userId, userName, currentRole }: Props) {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>(currentRole);
-  const [isPending, setIsPending] = useState(false);
+  const [state, formAction, isPending] = useActionState(editRoleAction, null);
+
+  console.log('useractionsmenu', state);
 
   return (
     <>
@@ -52,49 +42,47 @@ function UserActionsMenu({ userId, userName, currentRole }: UserActionsMenuProps
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => setRoleDialogOpen(true)}>Edit Role</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {/* <DropdownMenuItem variant="destructive" onSelect={() => setDeleteDialogOpen(true)}>
-            Delete User
-          </DropdownMenuItem> */}
+          <DropdownMenuItem
+            disabled={currentRole === 'admin'}
+            onSelect={() => setRoleDialogOpen(true)}
+          >
+            Edit Role
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={roleDialogOpen} onOpenChange={() => setRoleDialogOpen((prev) => !prev)}>
+      <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Edit User Role</DialogTitle>
             <DialogDescription>
-              Change role for <b>{userName}</b>. Click <b>Update Role</b> when you are done.
+              Are you sure you want set user role for <b>{userName}</b> to <b>admin</b>?
             </DialogDescription>
           </DialogHeader>
 
-          <Label htmlFor="role">Role</Label>
-          <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value)}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRoleDialogOpen(false)} disabled={isPending}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleRoleUpdate}
-              disabled={isPending || selectedRole === currentRole}
-            >
-              {isPending && <Spinner />}
-              {isPending ? 'Updating Role...' : 'Update Role'}
-            </Button>
-          </DialogFooter>
+          <form action={formAction}>
+            <input type="hidden" value={userId} name="userId"></input>
+            <DialogFooter>
+              {state && !state.ok && (
+                <div className="text-destructive text-sm flex gap-1 items-center">
+                  <AlertCircle size={16}></AlertCircle>
+                  {state.message}
+                </div>
+              )}
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => setRoleDialogOpen(false)}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Spinner />}
+                {isPending ? 'Updating Role...' : 'Update Role'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </>

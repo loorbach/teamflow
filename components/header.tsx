@@ -24,17 +24,18 @@ function Header() {
             </Link>
           </Button>
         )}
-        {pathname === '/admin' ? (
-          <Button disabled variant="ghost" size="sm">
-            Admin
-          </Button>
-        ) : (
-          <Button asChild variant="link" size="sm">
-            <Link href="/admin" draggable={false}>
+        {/* {isAdmin &&
+          (pathname === '/admin' ? (
+            <Button disabled variant="ghost" size="sm">
               Admin
-            </Link>
-          </Button>
-        )}
+            </Button>
+          ) : (
+            <Button asChild variant="link" size="sm">
+              <Link href="/admin" draggable={false}>
+                Admin
+              </Link>
+            </Button>
+          ))} */}
       </div>
       <div className="flex gap-2 items-center">
         <ModeToggle />

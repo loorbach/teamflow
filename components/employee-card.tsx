@@ -37,9 +37,10 @@ type Props = {
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >;
+  isAdmin: boolean;
 };
 
-function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
+function EmployeeCard({ employee, index, teamId, setEmployeesByTeam, isAdmin }: Props) {
   const { ref } = useSortable({
     id: employee.id,
     index,
@@ -181,7 +182,12 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
 
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" aria-label="Open menu" size="icon-sm">
+                      <Button
+                        variant="ghost"
+                        aria-label="Open menu"
+                        size="icon-sm"
+                        disabled={!isAdmin}
+                      >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
@@ -212,6 +218,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                     aria-label="Add Note"
                     variant="outline"
                     className="active:scale-93 transition-transform duration-150 ease-out"
+                    disabled={!isAdmin}
                   >
                     <PenLine className="size-3" />
                   </Button>

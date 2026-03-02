@@ -1,8 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { inferAdditionalFields } from 'better-auth/client/plugins';
 import { nextCookies } from 'better-auth/next-js';
-import { admin } from 'better-auth/plugins';
 import { db } from '../db/client';
 
 export const auth = betterAuth({
@@ -18,7 +16,13 @@ export const auth = betterAuth({
         type: 'string',
         required: true,
         fieldName: 'organization_id',
-        input: false,
+        input: true, //TODO: set to false
+      },
+      role: {
+        type: 'string',
+        required: true,
+        input: true, //TODO: set to false
+        fieldName: 'role',
       },
     },
   },
@@ -29,11 +33,7 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [
-    nextCookies(),
-    admin(),
-    inferAdditionalFields({ user: { organization_id: { type: 'string' } } }),
-  ],
+  plugins: [nextCookies()],
 });
 
 export type Session = typeof auth.$Infer.Session;

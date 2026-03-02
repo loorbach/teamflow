@@ -17,9 +17,10 @@ type Props = {
   teams: Team[];
   roles: Role[];
   roleTargets: Map<string, RoleTargetWithName[]>;
+  isAdmin: boolean;
 };
 
-function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
+function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: Props) {
   const [employeesByTeam, setEmployeesByTeam] = useState<
     Map<UniqueIdentifier, EmployeeWithNotes[]>
   >(() => new Map(Object.entries(initialEmployees)));
@@ -73,6 +74,13 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
       console.error('Failed to persist:', error);
       setEmployeesByTeam(previousState);
       toast.error('Failed to save changes');
+    }
+  }
+
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleBeforeDragStart(event) {
+    if (!isAdmin) {
+      event?.preventDefault();
     }
   }
 
@@ -226,12 +234,14 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
         teams={teams}
       />
       <DragDropProvider
+        onBeforeDragStart={handleBeforeDragStart}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         modifiers={[RestrictToWindow]}
       >
         <DnDContainer
+          isAdmin={isAdmin}
           teams={teams}
           employeesByTeam={employeesByTeam}
           roleTargets={roleTargets}

@@ -11,7 +11,7 @@ function Temp() {
           const email = formData.get('email') as string;
           const password = formData.get('password') as string;
           const orgId = formData.get('orgId') as string;
-          // const role = formData.get('role') as string;
+          const role = formData.get('role') as string;
           // console.log(name, email, password, orgId, role);
 
           try {
@@ -20,6 +20,8 @@ function Temp() {
                 name,
                 email,
                 password,
+                organization_id: orgId,
+                role,
               },
             });
 

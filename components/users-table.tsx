@@ -1,7 +1,10 @@
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import UserActionsMenu from './user-actions-menu';
+'use server';
 
+import { db } from '@/db/client';
+import { user } from '@/db/schema';
+import { auth } from '@/lib/auth';
+import { eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
 import {
   Table,
   TableBody,
@@ -11,12 +14,19 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table';
+import UserActionsMenu from './user-actions-menu';
+
 async function UsersTable() {
-  const users = await auth.api.listUsers({
-    query: {},
-    headers: await headers(),
-  });
-  console.log(users);
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session || !session.user || !session.user.organization_id) return;
+
+  const userData = await db
+    .select()
+    .from(user)
+    .where(eq(user.organization_id, session?.user.organization_id));
+
+  console.log(userData);
 
   return (
     <Table>
@@ -31,8 +41,8 @@ async function UsersTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.users &&
-          users?.users.map((user) => {
+        {userData &&
+          userData.map((user) => {
             if (!user.id || !user.role) return;
             return (
               <TableRow key={user.id}>
