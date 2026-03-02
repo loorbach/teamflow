@@ -46,10 +46,10 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
     }
   }
 
-  async function persistEmployees(changedEmployees: Employee[] | null) {
+  async function persistEmployees(changedEmployees: Employee[] | null, toastId: number | string) {
     const previousState = previousEmployeeRef.current;
     if (!changedEmployees) return;
-    // console.log('sending these to the backend!', changedEmployees)
+    console.log('sending these to the backend!', changedEmployees);
 
     try {
       await fetch('/api/employees/bulk-update', {
@@ -63,7 +63,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
           })),
         }),
       });
-      toast.success('Employee has been moved');
+      toast.success('Employee has been moved', { id: toastId });
     } catch (error) {
       console.error('Failed to persist:', error);
       setEmployeesByTeam(previousState);
@@ -127,6 +127,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
     if (!sourceTeamId || !targetTeamId) {
       return;
     }
+
+    const toastId = toast.loading('Saving changes...');
 
     setEmployeesByTeam((prevMap) => {
       let changedEmployees: EmployeeWithNotes[] | null = null;
@@ -199,7 +201,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: P
 
       if (changedEmployees) {
         // console.log('calling persist')
-        persistEmployees(changedEmployees);
+        persistEmployees(changedEmployees, toastId);
       }
       return map;
     });
