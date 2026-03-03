@@ -15,11 +15,6 @@ async function Home() {
   }
 
   const isAdmin = session.user.role === 'admin';
-  console.log(isAdmin);
-
-  console.log('logged in as:', session.user.name);
-  console.log('orgid', session.user.organization_id);
-  console.log('user role', session.user.role);
 
   const teamList = await db
     .select()
@@ -34,7 +29,7 @@ async function Home() {
   const employeeNoteList = await db.select().from(employeeNotes);
   const roleList = await db.select().from(roles);
 
-  console.log('emp list', employeesList);
+  // console.log('emp list', employeesList);
 
   const notesByEmployee = new Map<string, EmployeeNote[]>();
   employeeNoteList.forEach((note) => {

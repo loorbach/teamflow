@@ -27,7 +27,7 @@ function Temp() {
 
             if (data) console.log(data);
           } catch (error) {
-            console.log(error);
+            console.error(error);
           }
         }}
       >
