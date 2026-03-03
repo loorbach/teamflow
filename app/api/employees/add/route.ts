@@ -1,8 +1,8 @@
 import { db } from '@/db/client';
-import { employees } from '@/db/schema';
+import { employees, teams } from '@/db/schema';
 import { EmployeeNote } from '@/db/types';
 import { auth } from '@/lib/auth';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -23,14 +23,22 @@ const NewEmployeeSchema = z.object({
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session || !session.user) {
+  if (!session || !session.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const body = await req.json();
-    // console.log('received from frontend', body)
     const parsed = NewEmployeeSchema.parse(body);
+
+    const team = await db.query.teams.findFirst({
+      where: and(
+        eq(teams.id, parsed.teamId),
+        eq(teams.organizationId, session.user.organization_id),
+      ),
+    });
+
+    if (!team) return;
 
     const id = crypto.randomUUID();
 
@@ -40,16 +48,17 @@ export async function POST(req: NextRequest) {
       .where(eq(employees.teamId, parsed.teamId));
 
     const sortIndex = teamCountResult[0]?.count ?? 0;
-    // console.log(sortIndex)
 
-    const newEmployee = { id, ...parsed, sortIndex };
+    const organizationId = session.user.organization_id;
+
+    const newEmployee = { id, ...parsed, sortIndex, organizationId };
 
     await db.insert(employees).values(newEmployee);
 
     return NextResponse.json(newEmployee, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.log('zod error');
+      console.error('zod error', error);
       return NextResponse.json(
         { error: 'Validation failed', details: error.issues },
         { status: 400 },

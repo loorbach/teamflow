@@ -100,7 +100,7 @@ export async function editNote(formData: FormData, noteId: string, employeeId: s
       .where(and(eq(employeeNotes.id, noteId), eq(employeeNotes.employeeId, employeeId)))
       .returning();
 
-    console.log(updatedNote);
+    // console.log(updatedNote);
 
     if (!updatedNote) {
       throw new Error('Note not found or could not be updated.');

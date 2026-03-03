@@ -18,6 +18,7 @@ type Props = {
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >;
+  isAdmin: boolean;
 };
 
 const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
@@ -31,7 +32,7 @@ const MemoizedEmployeeCard = memo(EmployeeCard, (prev, next) => {
   return equal;
 });
 
-function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Props) {
+function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam, isAdmin }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const { isDropTarget, ref } = useDroppable({
     id: team.id,
@@ -118,6 +119,7 @@ function TeamColumn({ team, employees, teamRoleTargets, setEmployeesByTeam }: Pr
             teamId={team.id}
             index={idx}
             setEmployeesByTeam={setEmployeesByTeam}
+            isAdmin={isAdmin}
           />
         ))}
       </div>

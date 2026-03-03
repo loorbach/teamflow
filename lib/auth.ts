@@ -10,11 +10,30 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    additionalFields: {
+      organization_id: {
+        type: 'string',
+        required: true,
+        fieldName: 'organization_id',
+        input: true, //TODO: set to false
+      },
+      role: {
+        type: 'string',
+        required: true,
+        input: true, //TODO: set to false
+        fieldName: 'role',
+      },
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,
       maxAge: 60 * 5, //5 minutes
     },
   },
+
   plugins: [nextCookies()],
 });
+
+export type Session = typeof auth.$Infer.Session;

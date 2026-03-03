@@ -12,6 +12,7 @@ type Props = {
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >;
+  isAdmin: boolean;
 };
 
 const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
@@ -35,7 +36,7 @@ const MemoizedTeamColumn = memo(TeamColumn, (prev, next) => {
   return equal;
 });
 
-function DnDContainer({ employeesByTeam, teams, roleTargets, setEmployeesByTeam }: Props) {
+function DnDContainer({ employeesByTeam, teams, roleTargets, setEmployeesByTeam, isAdmin }: Props) {
   return (
     <div className="flex gap-4 flex-wrap px-4 py-2 items-start">
       {teams.map((team) => {
@@ -48,6 +49,7 @@ function DnDContainer({ employeesByTeam, teams, roleTargets, setEmployeesByTeam 
             employees={teamEmployees}
             teamRoleTargets={teamRoleTargets}
             setEmployeesByTeam={setEmployeesByTeam}
+            isAdmin={isAdmin}
           />
         );
       })}

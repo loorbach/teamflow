@@ -37,9 +37,10 @@ type Props = {
   setEmployeesByTeam: React.Dispatch<
     React.SetStateAction<Map<UniqueIdentifier, EmployeeWithNotes[]>>
   >;
+  isAdmin: boolean;
 };
 
-function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
+function EmployeeCard({ employee, index, teamId, setEmployeesByTeam, isAdmin }: Props) {
   const { ref } = useSortable({
     id: employee.id,
     index,
@@ -163,7 +164,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
             initial={{ y: -5, opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.05, ease: 'easeOut' }}
-            className="mt-2 text-xs hover:cursor-default"
+            className="mt-1.5 text-xs hover:cursor-default"
           >
             {employee.notes &&
               employee.notes.length > 0 &&
@@ -181,7 +182,12 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
 
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" aria-label="Open menu" size="icon-sm">
+                      <Button
+                        variant="ghost"
+                        aria-label="Open menu"
+                        size="icon-sm"
+                        disabled={!isAdmin}
+                      >
                         <EllipsisVertical />
                       </Button>
                     </DropdownMenuTrigger>
@@ -204,7 +210,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                   </DropdownMenu>
                 </div>
               ))}
-            <div className="border-t flex gap-2 items-center py-1">
+            <div className="border-t flex gap-2 items-center pt-1.5 pb-1">
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -212,6 +218,7 @@ function EmployeeCard({ employee, index, teamId, setEmployeesByTeam }: Props) {
                     aria-label="Add Note"
                     variant="outline"
                     className="active:scale-93 transition-transform duration-150 ease-out"
+                    disabled={!isAdmin}
                   >
                     <PenLine className="size-3" />
                   </Button>

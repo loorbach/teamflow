@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Slider } from './ui/slider';
 
-type EmployeeToBackend = Omit<EmployeeWithNotes, 'id' | 'sortIndex'>;
+type EmployeeToBackend = Omit<EmployeeWithNotes, 'id' | 'sortIndex' | 'organizationId'>;
 
 function AddEmployeeForm({
   onEmployeeAdded,

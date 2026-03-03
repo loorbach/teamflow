@@ -7,6 +7,7 @@ import { DragDropProvider } from '@dnd-kit/react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDeleteDialog } from './confirm-delete-dialog';
+import ControlBar from './control-bar';
 import DnDContainer from './dnd-container';
 import Header from './header';
 import TrashZone from './trash-zone';
@@ -16,9 +17,10 @@ type Props = {
   teams: Team[];
   roles: Role[];
   roleTargets: Map<string, RoleTargetWithName[]>;
+  isAdmin: boolean;
 };
 
-function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
+function HomeWrapper({ initialEmployees, teams, roles, roleTargets, isAdmin }: Props) {
   const [employeesByTeam, setEmployeesByTeam] = useState<
     Map<UniqueIdentifier, EmployeeWithNotes[]>
   >(() => new Map(Object.entries(initialEmployees)));
@@ -44,10 +46,10 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
     }
   }
 
-  async function persistEmployees(changedEmployees: Employee[] | null) {
+  async function persistEmployees(changedEmployees: Employee[] | null, toastId: number | string) {
     const previousState = previousEmployeeRef.current;
     if (!changedEmployees) return;
-    // console.log('sending these to the backend!', changedEmployees)
+    console.log('sending these to the backend!', changedEmployees);
 
     try {
       await fetch('/api/employees/bulk-update', {
@@ -61,17 +63,18 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
           })),
         }),
       });
-      toast.success('Employee has been moved', {
-        description: 'Click undo to revert this action',
-        action: {
-          label: 'Undo',
-          onClick: () => setEmployeesByTeam(previousState),
-        },
-      });
+      toast.success('Employee has been moved', { id: toastId });
     } catch (error) {
       console.error('Failed to persist:', error);
       setEmployeesByTeam(previousState);
       toast.error('Failed to save changes');
+    }
+  }
+
+  // @ts-expect-error event type unkown because of experimental state dnd-kit 04-10-2025
+  function handleBeforeDragStart(event) {
+    if (!isAdmin) {
+      event?.preventDefault();
     }
   }
 
@@ -124,6 +127,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
     if (!sourceTeamId || !targetTeamId) {
       return;
     }
+
+    const toastId = toast.loading('Saving changes...');
 
     setEmployeesByTeam((prevMap) => {
       let changedEmployees: EmployeeWithNotes[] | null = null;
@@ -196,7 +201,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
 
       if (changedEmployees) {
         // console.log('calling persist')
-        persistEmployees(changedEmployees);
+        persistEmployees(changedEmployees, toastId);
       }
       return map;
     });
@@ -204,7 +209,8 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
 
   return (
     <>
-      <Header
+      <Header />
+      <ControlBar
         onEmployeeAdded={(newEmployee: EmployeeWithNotes) => {
           setEmployeesByTeam((prevMap) => {
             const newMap = new Map(prevMap);
@@ -224,12 +230,14 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
         teams={teams}
       />
       <DragDropProvider
+        onBeforeDragStart={handleBeforeDragStart}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         modifiers={[RestrictToWindow]}
       >
         <DnDContainer
+          isAdmin={isAdmin}
           teams={teams}
           employeesByTeam={employeesByTeam}
           roleTargets={roleTargets}
@@ -260,13 +268,7 @@ function HomeWrapper({ initialEmployees, teams, roles, roleTargets }: Props) {
                   body: JSON.stringify({ employeeId: employeeToDelete.id }),
                 });
 
-                toast.success('Employee has been removed', {
-                  description: 'Click undo to revert this action',
-                  action: {
-                    label: 'Undo',
-                    onClick: () => setEmployeesByTeam(previousState),
-                  },
-                });
+                toast.success('Employee has been removed');
 
                 setEmployeeToDelete(null);
               } catch (error) {
